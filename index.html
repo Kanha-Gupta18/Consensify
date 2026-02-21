@@ -1,0 +1,4543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONSENSIFY | San Viceroy Public Consensus Gate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #020408;
+            --bg-panel: #0a0f14;
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --neon-red: #ff2a6d;
+            --neon-green: #05ffa1;
+            --text-dim: #4a5568;
+            --text-mid: #8b9bb4;
+            --text-bright: #e2e8f0;
+            --glass: rgba(0, 242, 255, 0.05);
+            --border-glow: rgba(0, 242, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-bright);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body.screen-mode .nav,
+        body.screen-mode .token-wallet,
+        body.screen-mode .commit-buttons { display: none !important; }
+        
+        body.screen-mode .consensus-board { transform: scale(1.1); }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(0, 242, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(188, 19, 254, 0.05) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-deep) 0%, #03070c 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-glow);
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 5px;
+        }
+
+        .nav-link {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            padding: 10px 18px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-decoration: none;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            border-color: var(--border-glow);
+            color: var(--neon-blue);
+            background: var(--glass);
+        }
+
+        .nav-link.active {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+        }
+
+        .token-wallet {
+            display: flex;
+            gap: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+        }
+
+        .wallet-item {
+            padding: 8px 15px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+        }
+
+        .wallet-item.calm { border-color: var(--neon-blue); }
+        .wallet-item.verify { border-color: var(--neon-green); }
+        .wallet-item.aid { border-color: var(--neon-purple); }
+
+        .wallet-label { color: var(--text-dim); margin-right: 8px; }
+        .wallet-value { font-weight: 700; }
+        .wallet-item.calm .wallet-value { color: var(--neon-blue); }
+        .wallet-item.verify .wallet-value { color: var(--neon-green); }
+        .wallet-item.aid .wallet-value { color: var(--neon-purple); }
+
+        .screen-toggle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            padding: 8px 15px;
+            background: transparent;
+            border: 1px solid var(--neon-purple);
+            color: var(--neon-purple);
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .screen-toggle:hover {
+            background: var(--neon-purple);
+            color: var(--bg-deep);
+            box-shadow: 0 0 15px var(--neon-purple);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-glow);
+            margin-bottom: 30px;
+        }
+
+        .logo-section h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 8px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-section .subtitle {
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            color: var(--text-dim);
+            margin-top: 5px;
+        }
+
+        .master-truth {
+            text-align: right;
+        }
+
+        .master-truth .label {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: var(--neon-purple);
+            margin-bottom: 5px;
+        }
+
+        .master-truth .value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--neon-blue);
+            text-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .district-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .district-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            padding: 12px 30px;
+            background: var(--glass);
+            border: 1px solid var(--border-glow);
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .district-btn.active {
+            background: rgba(0, 242, 255, 0.15);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 20px rgba(0, 242, 255, 0.1);
+        }
+
+        .district-btn:hover:not(.active) {
+            border-color: var(--text-mid);
+            color: var(--text-mid);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        .consensus-section h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 4px;
+            color: var(--text-mid);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .consensus-section h2::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .consensus-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .consensus-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .consensus-card:hover::before { opacity: 1; }
+
+        .consensus-card.active-protocol {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 30px rgba(188, 19, 254, 0.3);
+        }
+
+        .consensus-card.active-protocol::before {
+            opacity: 1;
+            background: var(--neon-purple);
+            animation: shutter-glitch 0.5s ease-out;
+        }
+
+        @keyframes shutter-glitch {
+            0% { transform: scaleX(0); opacity: 0; }
+            50% { transform: scaleX(1.2); opacity: 1; }
+            100% { transform: scaleX(1); opacity: 1; }
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+        }
+
+        .card-title.calm { color: var(--neon-blue); }
+        .card-title.verify { color: var(--neon-green); }
+        .card-title.aid { color: var(--neon-purple); }
+
+        .card-percentage {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+        }
+
+        .card-percentage.calm { color: var(--neon-blue); text-shadow: 0 0 20px var(--neon-blue); }
+        .card-percentage.verify { color: var(--neon-green); text-shadow: 0 0 20px var(--neon-green); }
+        .card-percentage.aid { color: var(--neon-purple); text-shadow: 0 0 20px var(--neon-purple); }
+
+        .threshold-marker {
+            font-size: 0.7rem;
+            color: var(--neon-red);
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        .threshold-marker.triggered { animation: pulse-warning 1s infinite; }
+
+        @keyframes pulse-warning {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .bar-container {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .bar-fill.calm { background: linear-gradient(90deg, var(--neon-blue), #00fff2); }
+        .bar-fill.verify { background: linear-gradient(90deg, var(--neon-green), #5fffc3); }
+        .bar-fill.aid { background: linear-gradient(90deg, var(--neon-purple), #d855ff); }
+
+        .bar-fill.redline { animation: redline-pulse 0.5s infinite; }
+
+        .echo-band {
+            position: absolute;
+            left: 0;
+            top: -4px;
+            bottom: -4px;
+            border: 2px solid var(--neon-purple);
+            border-radius: 4px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .echo-band.active {
+            animation: echo-pulse 1.5s ease-out forwards;
+        }
+
+        @keyframes echo-pulse {
+            0% { 
+                opacity: 0.8; 
+                transform: scaleX(0.1);
+                width: 10%;
+            }
+            50% { 
+                opacity: 0.5; 
+            }
+            100% { 
+                opacity: 0; 
+                transform: scaleX(1);
+                width: 100%;
+            }
+        }
+
+        .echo-band.calm { border-color: var(--neon-blue); }
+        .echo-band.verify { border-color: var(--neon-green); }
+        .echo-band.aid { border-color: var(--neon-purple); }
+
+        .mirror-indicator {
+            font-size: 0.6rem;
+            color: var(--neon-purple);
+            text-align: center;
+            margin-top: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mirror-indicator.active {
+            opacity: 1;
+            animation: mirror-pulse 2s ease-in-out;
+        }
+
+        @keyframes mirror-pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes redline-pulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.5) hue-rotate(-10deg); }
+        }
+
+        .threshold-line {
+            position: absolute;
+            right: 40%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--neon-red);
+            opacity: 0.7;
+        }
+
+        .card-effect {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        .lock-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lock-btn:hover:not(:disabled) {
+            background: var(--neon-blue);
+            color: var(--bg-deep);
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        .lock-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: var(--text-dim);
+            color: var(--text-dim);
+        }
+
+        .lock-btn.diminshing {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        .confidence-glow {
+            animation: confidence-pulse 0.8s ease-out;
+        }
+
+        @keyframes confidence-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.7); }
+            70% { box-shadow: 0 0 20px 10px rgba(0, 242, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0); }
+        }
+
+        .confidence-indicator {
+            font-size: 0.65rem;
+            color: var(--neon-blue);
+            text-align: center;
+            margin-top: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .confidence-indicator.active {
+            opacity: 1;
+        }
+
+        .confidence-tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .confidence-tooltip::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid var(--neon-blue);
+            padding: 8px 12px;
+            font-size: 0.6rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+            color: var(--text-mid);
+        }
+
+        .confidence-tooltip:hover::after {
+            opacity: 1;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-box {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            padding: 20px;
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            color: var(--neon-purple);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-glow);
+        }
+
+        .influencer {
+            display: flex;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .influencer:last-child { border-bottom: none; }
+
+        .influencer-avatar {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-panel);
+        }
+
+        .influencer-info { flex: 1; }
+
+        .influencer-name {
+            font-weight: 600;
+            color: var(--text-bright);
+            font-size: 0.9rem;
+        }
+
+        .influencer-stance {
+            font-size: 0.7rem;
+            color: var(--neon-blue);
+            margin-top: 3px;
+        }
+
+        .influencer-quote {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .heat-meters {
+            display: flex;
+            gap: 20px;
+        }
+
+        .heat-meter {
+            flex: 1;
+            text-align: center;
+        }
+
+        .heat-label {
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .heat-trend {
+            font-size: 0.6rem;
+        }
+
+        .heat-trend.rising { color: var(--neon-red); }
+        .heat-trend.falling { color: var(--neon-green); }
+        .heat-trend.stable { color: var(--text-dim); }
+
+        .heat-bar {
+            height: 100px;
+            width: 20px;
+            background: rgba(255,255,255,0.1);
+            margin: 0 auto;
+            position: relative;
+            overflow: visible;
+        }
+
+        .heat-zone-markers {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            margin-left: 5px;
+        }
+
+        .zone-marker {
+            position: absolute;
+            transform: translateY(50%);
+            font-size: 0.45rem;
+            color: var(--text-dim);
+            white-space: nowrap;
+            opacity: 0.5;
+        }
+
+        .zone-marker::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            width: 5px;
+            height: 1px;
+            background: var(--text-dim);
+            opacity: 0.3;
+        }
+
+        .heat-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            transition: height 0.5s ease;
+        }
+
+        .heat-fill.panic { 
+            background: linear-gradient(0deg, var(--neon-red), #ff6b8a); 
+        }
+        
+        .heat-fill.panic.zone-stable { background: linear-gradient(0deg, #00aa55, #00dd66); }
+        .heat-fill.panic.zone-elevated { background: linear-gradient(0deg, #ffaa00, #ffcc55); }
+        .heat-fill.panic.zone-critical { background: linear-gradient(0deg, var(--neon-red), #ff6b8a); }
+
+        .heat-fill.rumor { 
+            background: linear-gradient(0deg, #ffaa00, #ffcc55); 
+        }
+        
+        .heat-fill.rumor.zone-stable { background: linear-gradient(0deg, #00aa55, #00dd66); }
+        .heat-fill.rumor.zone-elevated { background: linear-gradient(0deg, #ffaa00, #ffcc55); }
+        .heat-fill.rumor.zone-critical { background: linear-gradient(0deg, var(--neon-red), #ff6b8a); }
+
+        .heat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            margin-top: 8px;
+        }
+
+        .heat-value.panic { color: var(--neon-red); }
+        .heat-value.rumor { color: #ffaa00; }
+
+        .heat-value.critical {
+            animation: critical-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes critical-pulse {
+            0%, 100% { opacity: 1; text-shadow: 0 0 10px currentColor; }
+            50% { opacity: 0.7; text-shadow: 0 0 20px currentColor; }
+        }
+
+        .heat-clarity {
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .heat-hint {
+            font-size: 0.5rem;
+            color: var(--text-dim);
+            margin-top: 4px;
+            opacity: 0.7;
+            line-height: 1.3;
+        }
+
+        .heat-projection {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            transition: bottom 0.5s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .heat-projection.rising {
+            border-bottom: 6px solid var(--neon-red);
+            opacity: 0.5;
+        }
+
+        .heat-projection.falling {
+            border-top: 6px solid var(--neon-green);
+            opacity: 0.5;
+        }
+
+        .heat-meter.critical {
+            animation: meter-critical-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes meter-critical-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 42, 109, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(255, 42, 109, 0.4); }
+        }
+
+        .screen-mode .heat-clarity,
+        .screen-mode .heat-hint,
+        .screen-mode .heat-zone-markers {
+            display: none;
+        }
+
+        .protocol-status {
+            text-align: center;
+            padding: 20px;
+            background: rgba(188, 19, 254, 0.1);
+            border: 1px solid var(--neon-purple);
+            display: none;
+        }
+
+        .protocol-status.active {
+            display: block;
+            animation: protocol-activate 0.5s ease-out;
+        }
+
+        @keyframes protocol-activate {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .protocol-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            color: var(--neon-purple);
+            margin-bottom: 10px;
+        }
+
+        .protocol-timer {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--neon-purple);
+            text-shadow: 0 0 20px var(--neon-purple);
+        }
+
+        .commit-trail {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .commit-trail-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+
+        .commit-entry {
+            font-size: 0.7rem;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--text-mid);
+        }
+
+        .commit-entry:last-child { border-bottom: none; }
+
+        .page-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+            color: var(--neon-blue);
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-glow);
+        }
+
+        .district-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .district-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .district-card:hover {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+        }
+
+        .district-card.active {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 25px rgba(188, 19, 254, 0.3);
+        }
+
+        .district-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+        }
+
+        .district-card.old-dock h3 { color: var(--neon-blue); }
+        .district-card.midtown h3 { color: var(--neon-green); }
+
+        .district-mood {
+            font-size: 0.8rem;
+            color: var(--text-mid);
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .district-bars .district-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .district-bar-label {
+            width: 60px;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+        }
+
+        .district-bar-track {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .district-bar-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .district-bar-fill.calm { background: var(--neon-blue); }
+        .district-bar-fill.verify { background: var(--neon-green); }
+        .district-bar-fill.aid { background: var(--neon-purple); }
+
+        .district-bar-value {
+            width: 35px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            text-align: right;
+        }
+
+        .mini-feed {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-glow);
+        }
+
+        .mini-feed-item {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+        }
+
+        .mini-feed-item.urgent { color: var(--neon-red); }
+
+        .influencer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .influencer-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .influencer-card:hover {
+            border-color: var(--neon-purple);
+        }
+
+        .influencer-avatar, .influencer-card .avatar {
+            position: relative;
+            border-radius: 50%;
+            overflow: visible;
+        }
+
+        .influencer-avatar::before, .influencer-card .avatar::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 2px solid;
+            opacity: 0.6;
+            animation: avatar-pulse 3s ease-in-out infinite;
+        }
+
+        .influencer-avatar.calm::before, .influencer-card .avatar.calm::before {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue), inset 0 0 10px rgba(0, 242, 255, 0.2);
+        }
+
+        .influencer-avatar.verify::before, .influencer-card .avatar.verify::before {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green), inset 0 0 10px rgba(5, 255, 161, 0.2);
+        }
+
+        .influencer-avatar.aid::before, .influencer-card .avatar.aid::before {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 10px var(--neon-purple), inset 0 0 10px rgba(188, 19, 254, 0.2);
+        }
+
+        @keyframes avatar-pulse {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.02); }
+        }
+
+        .avatar-svg {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--bg-panel);
+        }
+
+        .avatar-svg svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .avatar-fallback {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+        }
+
+        .influencer-card .avatar {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .influencer-avatar {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-panel);
+        }
+
+        .influencer-card .name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .influencer-card .bio {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+
+        .influencer-card .stance {
+            font-size: 0.75rem;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+        }
+
+        .momentum-meter {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .momentum-fill {
+            height: 100%;
+            background: var(--neon-purple);
+            transition: width 0.5s ease;
+        }
+
+        .integrity-meter {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 6px;
+            position: relative;
+        }
+
+        .integrity-fill {
+            height: 100%;
+            background: var(--neon-green);
+            transition: width 0.5s ease, background 0.3s ease;
+        }
+
+        .integrity-fill.warning {
+            background: var(--neon-red);
+            animation: integrity-pulse 1.5s infinite;
+        }
+
+        @keyframes integrity-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .integrity-label {
+            font-size: 0.55rem;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+
+        .influencer-card.low-integrity {
+            animation: low-integrity-glow 2s infinite;
+        }
+
+        @keyframes low-integrity-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 42, 109, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(255, 42, 109, 0.4); }
+        }
+
+        .momentum-label {
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            margin-bottom: 15px;
+        }
+
+        .stake-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--neon-purple);
+            color: var(--neon-purple);
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .stake-btn:hover:not(:disabled) {
+            background: var(--neon-purple);
+            color: var(--bg-deep);
+        }
+
+        .stake-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .commit-step {
+            margin-bottom: 30px;
+        }
+
+        .step-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 15px;
+        }
+
+        .step-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .step-option {
+            padding: 15px 25px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .step-option:hover {
+            border-color: var(--neon-blue);
+        }
+
+        .step-option.selected {
+            border-color: var(--neon-purple);
+            background: rgba(188, 19, 254, 0.1);
+        }
+
+        .step-option .option-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .step-option .option-desc {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+        }
+
+        .commit-preview {
+            background: var(--bg-panel);
+            border: 1px solid var(--neon-purple);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .commit-preview-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: var(--neon-purple);
+            margin-bottom: 15px;
+        }
+
+        .commit-preview-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-bright);
+        }
+
+        .commit-confirm-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            padding: 15px 40px;
+            background: var(--neon-purple);
+            border: none;
+            color: var(--bg-deep);
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .commit-confirm-btn:hover {
+            box-shadow: 0 0 25px var(--neon-purple);
+        }
+
+        .commit-confirm-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .transparency-section {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .transparency-section h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 3px;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+        }
+
+        .transparency-section p {
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: var(--text-mid);
+        }
+
+        .transparency-section ul {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .transparency-section li {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .transparency-section li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--neon-green);
+        }
+
+        footer {
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid var(--border-glow);
+            font-family: 'Rajdhani', monospace;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            line-height: 1.8;
+        }
+
+        footer .commitment { color: var(--neon-blue); }
+        footer .metrics { color: var(--neon-green); }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid var(--neon-purple);
+            padding: 8px 12px;
+            font-size: 0.65rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+        }
+
+        .tooltip:hover::after { opacity: 1; }
+
+        .momentum-indicator {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .momentum-indicator.active { color: var(--neon-purple); }
+
+        .deliberation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(2, 4, 8, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .deliberation-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--bg-panel);
+            border: 1px solid var(--neon-blue);
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.3);
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 3px;
+            color: var(--neon-blue);
+            margin-bottom: 20px;
+        }
+
+        .modal-cause {
+            font-size: 0.9rem;
+            color: var(--text-bright);
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .modal-effect {
+            font-size: 0.8rem;
+            color: var(--neon-purple);
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(188, 19, 254, 0.1);
+            border: 1px solid var(--neon-purple);
+        }
+
+        .modal-timer {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+        }
+
+        .modal-timer.ready {
+            color: var(--neon-green);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            padding: 12px 25px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-confirm {
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .modal-btn-confirm:hover:not(:disabled) {
+            background: var(--neon-blue);
+            color: var(--bg-deep);
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        .modal-btn-confirm:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .modal-btn-cancel {
+            background: transparent;
+            border: 1px solid var(--text-dim);
+            color: var(--text-dim);
+        }
+
+        .modal-btn-cancel:hover {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        .bypass-notice {
+            font-size: 0.65rem;
+            color: var(--neon-purple);
+            margin-top: 15px;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 242, 255, 0.01) 2px,
+                rgba(0, 242, 255, 0.01) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .ripple-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            border: 2px solid var(--neon-purple);
+            animation: ripple 0.6s ease-out;
+        }
+
+        .token-depleted {
+            opacity: 0.4;
+        }
+
+        @media (max-width: 900px) {
+            .cards-container { grid-template-columns: 1fr; }
+            .main-grid { grid-template-columns: 1fr; }
+            .district-grid { grid-template-columns: 1fr; }
+            .influencer-grid { grid-template-columns: 1fr; }
+            .nav-links { flex-wrap: wrap; }
+            .token-wallet { flex-wrap: wrap; }
+        }
+
+        /* NEW STYLES FOR AUTHENTICATION */
+        .auth-input {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            color: var(--text-bright);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            padding: 12px 15px;
+            width: 100%;
+            letter-spacing: 2px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--neon-blue);
+            border-bottom: 2px solid var(--neon-blue);
+        }
+
+        .reg-option {
+            padding: 12px 15px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            flex: 1;
+        }
+
+        .reg-option.selected {
+            background: rgba(0, 242, 255, 0.08);
+            border-color: var(--neon-blue);
+        }
+
+        .reg-option .opt-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        .reg-option .opt-desc {
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            line-height: 1.4;
+        }
+
+        /* ── PIPELINE VISUALIZER ── */
+        #pipeline-visualizer {
+          display: flex;
+          align-items: center;
+          gap: 0;
+          margin-bottom: 40px;
+          background: var(--bg-panel);
+          border: 1px solid var(--border-glow);
+          padding: 25px 30px;
+        }
+
+        .pipeline-stage {
+          flex: 1;
+          display: block;
+          border: none;
+          text-align: center;
+          padding: 15px 10px;
+          position: relative;
+        }
+
+        .pipeline-stage-number {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.6rem;
+          letter-spacing: 2px;
+          color: var(--text-dim);
+          margin-bottom: 6px;
+        }
+
+        .pipeline-stage-label {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.8rem;
+          letter-spacing: 2px;
+          font-weight: 700;
+        }
+
+        .pipeline-stage.authority .pipeline-stage-label { color: var(--neon-red); }
+        .pipeline-stage.council .pipeline-stage-label { color: var(--neon-purple); }
+        .pipeline-stage.public .pipeline-stage-label { color: var(--neon-blue); }
+        .pipeline-stage.canonical .pipeline-stage-label { color: var(--neon-green); }
+
+        .pipeline-stage-desc {
+          font-size: 0.65rem;
+          color: var(--text-dim);
+          margin-top: 6px;
+          line-height: 1.4;
+        }
+
+        .pipeline-arrow {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 1.2rem;
+          color: var(--border-glow);
+          padding: 0 5px;
+          flex-shrink: 0;
+        }
+
+        /* ── STAGE BADGES ── */
+        .stage-badge {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.6rem;
+          letter-spacing: 1px;
+          padding: 3px 8px;
+          margin-right: 10px;
+          border: 1px solid;
+        }
+
+        .stage-badge.stage-1 {
+          color: var(--neon-red);
+          border-color: var(--neon-red);
+          background: rgba(255, 42, 109, 0.08);
+        }
+
+        .stage-badge.stage-2 {
+          color: var(--neon-purple);
+          border-color: var(--neon-purple);
+          background: rgba(188, 19, 254, 0.08);
+        }
+
+        .stage-badge.stage-3 {
+          color: var(--neon-blue);
+          border-color: var(--neon-blue);
+          background: rgba(0, 242, 255, 0.08);
+        }
+
+        .stage-badge.canonical {
+          color: var(--neon-green);
+          border-color: var(--neon-green);
+          background: rgba(5, 255, 161, 0.08);
+        }
+
+        /* ── REPORTS SECTION TITLES ── */
+        .reports-section-title {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.75rem;
+          letter-spacing: 3px;
+          color: var(--text-mid);
+          margin: 30px 0 15px 0;
+          padding-bottom: 10px;
+          border-bottom: 1px solid var(--border-glow);
+          display: flex;
+          align-items: center;
+        }
+
+        /* ── REPORT CARDS ── */
+        .report-card {
+          background: var(--bg-panel);
+          border: 1px solid var(--border-glow);
+          padding: 25px;
+          margin-bottom: 15px;
+          transition: border-color 0.3s ease;
+          position: relative;
+        }
+
+        .report-card.stage-pending { border-left: 3px solid var(--neon-red); }
+        .report-card.stage-deliberation { border-left: 3px solid var(--neon-purple); }
+        .report-card.stage-public { border-left: 3px solid var(--neon-blue); }
+        .report-card.stage-canonical { border-left: 3px solid var(--neon-green); }
+        .report-card.stage-returned { border-left: 3px solid var(--text-dim); opacity: 0.7; }
+
+        .report-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 12px;
+        }
+
+        .report-title {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.9rem;
+          letter-spacing: 2px;
+          color: var(--text-bright);
+          flex: 1;
+          margin-right: 15px;
+          word-break: break-word;
+          overflow-wrap: break-word;
+          min-width: 0;
+        }
+
+        .urgency-badge {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.6rem;
+          letter-spacing: 1px;
+          padding: 4px 10px;
+          border: 1px solid;
+          flex-shrink: 0;
+        }
+
+        .urgency-badge.routine {
+          color: var(--neon-blue);
+          border-color: var(--neon-blue);
+        }
+
+        .urgency-badge.elevated {
+          color: #ffa500;
+          border-color: #ffa500;
+        }
+
+        .urgency-badge.critical {
+          color: var(--neon-red);
+          border-color: var(--neon-red);
+          animation: pulse-warning 1s infinite;
+        }
+
+        .report-body {
+          font-size: 0.85rem;
+          color: var(--text-mid);
+          line-height: 1.7;
+          margin-bottom: 15px;
+          padding: 12px 15px;
+          background: rgba(255,255,255,0.02);
+          border-left: 2px solid var(--border-glow);
+          word-break: break-word;
+          overflow-wrap: break-word;
+        }
+
+        .report-meta {
+          font-size: 0.65rem;
+          color: var(--text-dim);
+          font-family: 'Orbitron', sans-serif;
+          letter-spacing: 1px;
+          margin-bottom: 15px;
+          word-break: break-word;
+          overflow-wrap: break-word;
+        }
+
+        /* ── VALIDATOR PROGRESS BAR ── */
+        .validator-progress {
+          margin: 15px 0;
+        }
+
+        .validator-progress-label {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.65rem;
+          font-family: 'Orbitron', sans-serif;
+          letter-spacing: 1px;
+          color: var(--text-dim);
+          margin-bottom: 6px;
+        }
+
+        .validator-progress-label .pct {
+          color: var(--neon-purple);
+          font-weight: 700;
+        }
+
+        .validator-progress-track {
+          height: 6px;
+          background: rgba(255,255,255,0.08);
+          position: relative;
+        }
+
+        .validator-progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, var(--neon-purple), #d855ff);
+          transition: width 0.5s ease;
+        }
+
+        .validator-threshold-line {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 2px;
+          background: var(--neon-red);
+          left: 60%;
+        }
+
+        /* ── VALIDATOR LIST ── */
+        .validator-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin: 12px 0;
+        }
+
+        .validator-chip {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 5px 10px;
+          background: rgba(0,0,0,0.3);
+          border: 1px solid var(--border-glow);
+          font-size: 0.65rem;
+        }
+
+        .validator-chip .action-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        .validator-chip.validate .action-dot { background: var(--neon-green); }
+        .validator-chip.challenge .action-dot { background: var(--neon-red); }
+        .validator-chip.abstain .action-dot { background: var(--text-dim); }
+
+        .validator-chip .v-name { color: var(--text-bright); }
+        .validator-chip .v-score { color: var(--text-dim); font-size: 0.55rem; }
+
+        /* ── ACTION BUTTONS ON REPORT CARDS ── */
+        .report-actions {
+          display: flex;
+          gap: 10px;
+          margin-top: 15px;
+          flex-wrap: wrap;
+        }
+
+        .report-action-btn {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.65rem;
+          letter-spacing: 1px;
+          padding: 10px 18px;
+          background: transparent;
+          border: 1px solid;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .report-action-btn.validate {
+          color: var(--neon-green);
+          border-color: var(--neon-green);
+        }
+        .report-action-btn.validate:hover {
+          background: var(--neon-green);
+          color: var(--bg-deep);
+          box-shadow: 0 0 15px var(--neon-green);
+        }
+
+        .report-action-btn.challenge {
+          color: var(--neon-red);
+          border-color: var(--neon-red);
+        }
+        .report-action-btn.challenge:hover {
+          background: var(--neon-red);
+          color: var(--bg-deep);
+        }
+
+        .report-action-btn.abstain {
+          color: var(--text-dim);
+          border-color: var(--text-dim);
+        }
+        .report-action-btn.abstain:hover {
+          background: var(--text-dim);
+          color: var(--bg-deep);
+        }
+
+        .report-action-btn.accept {
+          color: var(--neon-blue);
+          border-color: var(--neon-blue);
+        }
+        .report-action-btn.accept:hover {
+          background: var(--neon-blue);
+          color: var(--bg-deep);
+          box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        .report-action-btn.dispute {
+          color: var(--neon-red);
+          border-color: var(--neon-red);
+        }
+        .report-action-btn.dispute:hover {
+          background: var(--neon-red);
+          color: var(--bg-deep);
+        }
+
+        .report-action-btn:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+
+        /* ── CHALLENGE INPUT ── */
+        .challenge-input-area {
+          display: none;
+          margin-top: 12px;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .challenge-input-area.visible { display: flex; }
+
+        .challenge-textarea {
+          background: var(--bg-panel);
+          border: 1px solid var(--neon-red);
+          color: var(--text-bright);
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 0.85rem;
+          padding: 10px 12px;
+          resize: vertical;
+          min-height: 70px;
+          width: 100%;
+          outline: none;
+        }
+
+        .challenge-submit-btn {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.65rem;
+          letter-spacing: 1px;
+          padding: 8px 16px;
+          background: var(--neon-red);
+          border: none;
+          color: var(--bg-deep);
+          cursor: pointer;
+          align-self: flex-end;
+        }
+
+        /* ── DELIBERATION THREAD ── */
+        .deliberation-thread {
+          margin-top: 15px;
+          padding: 12px;
+          background: rgba(188, 19, 254, 0.04);
+          border: 1px solid rgba(188, 19, 254, 0.2);
+        }
+
+        .thread-title {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.6rem;
+          letter-spacing: 2px;
+          color: var(--neon-purple);
+          margin-bottom: 10px;
+        }
+
+        .thread-entry {
+          padding: 8px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+          font-size: 0.8rem;
+          line-height: 1.5;
+          word-break: break-word;
+          overflow-wrap: break-word;
+        }
+
+        .thread-entry:last-child { border-bottom: none; }
+
+        .thread-from-authority { color: var(--neon-red); }
+        .thread-from-influencer { color: var(--neon-purple); }
+
+        .thread-entry .thread-meta {
+          font-size: 0.6rem;
+          color: var(--text-dim);
+          margin-bottom: 3px;
+          font-family: 'Orbitron', sans-serif;
+          letter-spacing: 1px;
+        }
+
+        /* ── AUTHORITY REPLY BOX ── */
+        .authority-reply-area {
+          display: none;
+          margin-top: 10px;
+          gap: 8px;
+          flex-direction: column;
+        }
+
+        .authority-reply-area.visible { display: flex; }
+
+        /* ── PUBLISH FORM ── */
+        #authority-publish-panel {
+          background: var(--bg-panel);
+          border: 1px solid var(--neon-red);
+          padding: 25px;
+          margin-bottom: 30px;
+        }
+
+        .publish-form-title {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.8rem;
+          letter-spacing: 3px;
+          color: var(--neon-red);
+          margin-bottom: 20px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid rgba(255, 42, 109, 0.3);
+        }
+
+        .publish-field {
+          margin-bottom: 15px;
+        }
+
+        .publish-label {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.65rem;
+          letter-spacing: 2px;
+          color: var(--text-dim);
+          margin-bottom: 6px;
+          display: block;
+        }
+
+        .publish-input {
+          background: rgba(0,0,0,0.3);
+          border: 1px solid var(--border-glow);
+          color: var(--text-bright);
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 0.9rem;
+          padding: 10px 12px;
+          width: 100%;
+          outline: none;
+          transition: border-color 0.2s ease;
+        }
+
+        .publish-input:focus {
+          border-color: var(--neon-red);
+          box-shadow: 0 0 10px rgba(255, 42, 109, 0.2);
+        }
+
+        .publish-textarea {
+          background: rgba(0,0,0,0.3);
+          border: 1px solid var(--border-glow);
+          color: var(--text-bright);
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 0.9rem;
+          padding: 10px 12px;
+          width: 100%;
+          resize: vertical;
+          min-height: 100px;
+          outline: none;
+          transition: border-color 0.2s ease;
+        }
+
+        .publish-textarea:focus {
+          border-color: var(--neon-red);
+        }
+
+        .urgency-selector {
+          display: flex;
+          gap: 10px;
+        }
+
+        .urgency-option {
+          flex: 1;
+          padding: 10px;
+          background: var(--bg-panel);
+          border: 1px solid var(--border-glow);
+          cursor: pointer;
+          text-align: center;
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.65rem;
+          letter-spacing: 1px;
+          transition: all 0.3s ease;
+          color: var(--text-dim);
+        }
+
+        .urgency-option.selected.routine {
+          border-color: var(--neon-blue);
+          color: var(--neon-blue);
+          background: rgba(0, 242, 255, 0.08);
+        }
+
+        .urgency-option.selected.elevated {
+          border-color: #ffa500;
+          color: #ffa500;
+          background: rgba(255, 165, 0, 0.08);
+        }
+
+        .urgency-option.selected.critical {
+          border-color: var(--neon-red);
+          color: var(--neon-red);
+          background: rgba(255, 42, 109, 0.08);
+        }
+
+        .publish-submit-btn {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.75rem;
+          letter-spacing: 2px;
+          padding: 14px 35px;
+          background: var(--neon-red);
+          border: none;
+          color: var(--bg-deep);
+          cursor: pointer;
+          transition: all 0.3s ease;
+          margin-top: 10px;
+        }
+
+        .publish-submit-btn:hover {
+          box-shadow: 0 0 25px var(--neon-red);
+        }
+
+        /* ── PUBLIC CONSENSUS BARS ── */
+        .public-vote-bars {
+          margin: 15px 0;
+        }
+
+        .public-vote-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 8px;
+        }
+
+        .public-vote-label {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.65rem;
+          letter-spacing: 1px;
+          width: 70px;
+          flex-shrink: 0;
+        }
+
+        .public-vote-label.accept { color: var(--neon-blue); }
+        .public-vote-label.dispute { color: var(--neon-red); }
+
+        .public-vote-track {
+          flex: 1;
+          height: 8px;
+          background: rgba(255,255,255,0.08);
+          position: relative;
+        }
+
+        .public-vote-fill {
+          height: 100%;
+          transition: width 0.5s ease;
+        }
+
+        .public-vote-fill.accept {
+          background: linear-gradient(90deg, var(--neon-blue), #00fff2);
+        }
+
+        .public-vote-fill.dispute {
+          background: linear-gradient(90deg, var(--neon-red), #ff6b9d);
+        }
+
+        .public-vote-pct {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.7rem;
+          width: 40px;
+          text-align: right;
+          flex-shrink: 0;
+        }
+
+        .public-vote-pct.accept { color: var(--neon-blue); }
+        .public-vote-pct.dispute { color: var(--neon-red); }
+
+        /* ── VALIDATOR REPUTATION BOX ── */
+        .validator-rep-box {
+          padding: 10px 12px;
+          background: rgba(188, 19, 254, 0.05);
+          border: 1px solid rgba(188, 19, 254, 0.2);
+          margin-bottom: 12px;
+          display: flex;
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+
+        .rep-stat {
+          text-align: center;
+        }
+
+        .rep-stat-value {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 1rem;
+          font-weight: 700;
+          color: var(--neon-purple);
+        }
+
+        .rep-stat-label {
+          font-size: 0.6rem;
+          color: var(--text-dim);
+          letter-spacing: 1px;
+          margin-top: 2px;
+        }
+
+        /* ── EMPTY STATES ── */
+        .empty-state {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.65rem;
+          letter-spacing: 2px;
+          color: var(--text-dim);
+          padding: 20px;
+          text-align: center;
+          border: 1px dashed rgba(255,255,255,0.08);
+        }
+
+        /* ── CANONICAL ENTRY ── */
+        .canonical-entry {
+          background: rgba(5, 255, 161, 0.03);
+          border: 1px solid rgba(5, 255, 161, 0.2);
+          padding: 20px 25px;
+          margin-bottom: 10px;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 20px;
+        }
+
+        .canonical-entry > div {
+          min-width: 0;
+          word-break: break-word;
+          overflow-wrap: break-word;
+        }
+
+        .canonical-title {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.85rem;
+          color: var(--neon-green);
+          letter-spacing: 2px;
+          margin-bottom: 5px;
+          word-break: break-word;
+          overflow-wrap: break-word;
+        }
+
+        .canonical-meta {
+          font-size: 0.65rem;
+          color: var(--text-dim);
+          font-family: 'Orbitron', sans-serif;
+          letter-spacing: 1px;
+        }
+
+        .canonical-accept-pct {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 1.5rem;
+          font-weight: 900;
+          color: var(--neon-green);
+          text-shadow: 0 0 15px var(--neon-green);
+          flex-shrink: 0;
+        }
+
+        /* ── PENDING STATUS BADGE on main board ── */
+        .pipeline-board-notice {
+          background: rgba(188, 19, 254, 0.06);
+          border: 1px solid rgba(188, 19, 254, 0.3);
+          padding: 12px 20px;
+          margin-bottom: 20px;
+          display: none;
+          justify-content: space-between;
+          align-items: center;
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.7rem;
+          letter-spacing: 1px;
+          color: var(--neon-purple);
+        }
+
+        .pipeline-board-notice.visible { display: flex; }
+
+        @media (max-width: 900px) {
+          #pipeline-visualizer { flex-direction: column; gap: 10px; }
+          .pipeline-arrow { transform: rotate(90deg); }
+          .urgency-selector { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+    <div class="container">
+        
+        <nav style="display: none;">
+            <div class="nav-links">
+                <a href="#board" class="nav-link active" data-page="board">BOARD</a>
+                <a href="#commit" class="nav-link" data-page="commit">COMMIT</a>
+                <a href="#districts" class="nav-link" data-page="districts">DISTRICTS</a>
+                <a href="#influencers" class="nav-link" data-page="influencers">CATALYSTS</a>
+                <a href="#transparency" class="nav-link" data-page="transparency">TRANSPARENCY</a>
+                <a href="#reports" class="nav-link" data-page="reports">REPORTS</a>
+            </div>
+            <div class="token-wallet">
+                <div class="wallet-item calm"><span class="wallet-label">CALM</span><span class="wallet-value" id="wallet-calm">3</span></div>
+                <div class="wallet-item verify"><span class="wallet-label">VERIFY</span><span class="wallet-value" id="wallet-verify">3</span></div>
+                <div class="wallet-item aid"><span class="wallet-label">AID</span><span class="wallet-value" id="wallet-aid">3</span></div>
+            </div>
+            <button class="screen-toggle" onclick="toggleScreenMode()">SCREEN MODE</button>
+        </nav>
+
+        <!-- LOGIN PAGE -->
+        <div id="page-login" class="page active">
+            <div style="text-align: center; margin-bottom: 40px; margin-top: 50px;">
+                <h1 style="font-family: 'Orbitron', sans-serif; font-size: 2.5rem; font-weight: 900; letter-spacing: 8px; background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">CONSENSIFY</h1>
+                <div style="font-size: 0.8rem; letter-spacing: 4px; color: var(--text-dim); margin-top: 10px;">SAN VICEROY PUBLIC CONSENSUS GATE</div>
+            </div>
+
+            <div id="login-panel" style="max-width: 460px; margin: 0 auto; background: var(--bg-panel); padding: 30px; border: 1px solid var(--border-glow);">
+                <div id="credential-hints" style="font-size: 0.65rem; color: var(--text-dim); font-family: 'Orbitron', sans-serif; margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.02); border: 1px dashed var(--text-dim); line-height: 1.6;">
+                    // ACTIVE DEMO CREDENTIALS<br>
+                    <span style="color:var(--neon-blue)">Citizen:</span> alex_v / password<br>
+                    <span style="color:var(--neon-purple)">Influencer:</span> maya_d / password<br>
+                    <span style="color:var(--neon-red)">Authority:</span> cmd_01 / password
+                </div>
+
+                <!-- TAB TOGGLE -->
+                <div style="display: flex; width: 100%; border: 1px solid var(--border-glow); margin-bottom: 20px;">
+                    <button id="tab-signin" class="tab-btn active" onclick="switchTab('signin')">SIGN IN</button>
+                    <button id="tab-register" class="tab-btn" onclick="switchTab('register')">REGISTER</button>
+                </div>
+
+                <!-- LOGIN FORM -->
+                <div id="login-form" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div>
+                        <label style="font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--text-mid); display: block; margin-bottom: 5px;">CITIZEN ID</label>
+                        <input type="text" id="login-username" class="auth-input" placeholder="Enter Citizen ID">
+                    </div>
+                    <div>
+                        <label style="font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--text-mid); display: block; margin-bottom: 5px;">ACCESS CODE</label>
+                        <input type="password" id="login-password" class="auth-input" placeholder="Enter Access Code">
+                    </div>
+                    <div id="login-error" style="display: none; font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--neon-red); text-align: center; margin-top: 5px;"></div>
+                    <button class="commit-confirm-btn" onclick="attemptLogin()" style="width: 100%; margin-top: 10px;">AUTHENTICATE</button>
+                </div>
+
+                <!-- REGISTER FORM -->
+                <div id="register-form" style="display: none; flex-direction: column; gap: 15px;">
+                    <div>
+                        <label style="font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--text-mid); display: block; margin-bottom: 5px;">DISPLAY NAME</label>
+                        <input type="text" id="reg-displayname" class="auth-input" placeholder="e.g. Vex_Docks">
+                    </div>
+                    <div>
+                        <label style="font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--text-mid); display: block; margin-bottom: 5px;">CITIZEN ID</label>
+                        <input type="text" id="reg-username" class="auth-input" placeholder="lowercase, no spaces">
+                    </div>
+                    <div>
+                        <label style="font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--text-mid); display: block; margin-bottom: 5px;">ACCESS CODE</label>
+                        <input type="password" id="reg-password" class="auth-input" placeholder="min 6 characters">
+                    </div>
+                    <div>
+                        <label style="font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--text-mid); display: block; margin-bottom: 5px;">CONFIRM ACCESS CODE</label>
+                        <input type="password" id="reg-confirm" class="auth-input">
+                    </div>
+
+                    <div id="reg-role-options" style="margin-top: 5px;">
+                        <label style="font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--text-mid); display: block; margin-bottom: 10px;">ASSIGN ROLE</label>
+                        <div style="display: flex; gap: 10px;">
+                            <div class="reg-option selected" data-role="citizen" style="border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); background: rgba(0, 242, 255, 0.1);">
+                                <div class="opt-title" style="color: var(--neon-blue);">CITIZEN</div>
+                                <div class="opt-desc">Lock tokens, vote on stances</div>
+                            </div>
+                            <div class="reg-option" data-role="influencer">
+                                <div class="opt-title" style="color: var(--neon-purple);">INFLUENCER</div>
+                                <div class="opt-desc">Catalyze momentum, stake endorsements</div>
+                            </div>
+                            <div class="reg-option" data-role="authority">
+                                <div class="opt-title" style="color: var(--neon-red);">AUTHORITY</div>
+                                <div class="opt-desc">Monitor grid, issue overrides</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="reg-district-section" style="margin-top: 5px;">
+                        <label style="font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--text-mid); display: block; margin-bottom: 10px;">HOME DISTRICT</label>
+                        <div id="reg-district-options" style="display: flex; gap: 10px;">
+                            <div class="reg-option selected" data-district="Old Dock">
+                                <div class="opt-title">OLD DOCK</div>
+                            </div>
+                            <div class="reg-option" data-district="Midtown">
+                                <div class="opt-title">MIDTOWN</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="register-error" style="display: none; font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--neon-red); text-align: center; margin-top: 5px;"></div>
+                    <button id="register-btn" class="commit-confirm-btn" style="width: 100%; margin-top: 10px; background: var(--neon-purple);">REGISTER CITIZEN</button>
+                </div>
+                
+                <hr style="border: 0; border-bottom: 1px solid rgba(255,255,255,0.05); margin: 25px 0;">
+                <div style="text-align: center; font-size: 0.6rem; color: var(--text-dim); font-family: 'Orbitron', sans-serif; letter-spacing: 2px;">
+                    // END OF SECURE PROTOCOL //
+                </div>
+            </div>
+
+            <!-- REGISTRY PANEL -->
+            <div id="registry-panel" style="max-width: 460px; width: 100%; margin: 20px auto 0; background: var(--bg-panel); border: 1px solid var(--border-glow); padding: 20px;">
+                <div style="font-family: 'Orbitron', sans-serif; font-size: 0.6rem; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 12px;">// ACTIVE SESSION REGISTRY</div>
+                <div id="registry-list" style="max-height: 140px; overflow-y: auto;"></div>
+            </div>
+        </div>
+
+        <!-- BOARD PAGE -->
+        <div id="page-board" class="page">
+            <div id="pipeline-board-notice" class="pipeline-board-notice">
+              <span class="notice-text"></span>
+              <a href="#reports" style="font-family:Orbitron;font-size:0.6rem; letter-spacing:1px;color:var(--neon-purple);text-decoration:none;">
+                VIEW PIPELINE →
+              </a>
+            </div>
+            <div id="welcome-banner" style="display: none; background: rgba(5, 255, 161, 0.08); border: 1px solid rgba(5, 255, 161, 0.3); padding: 12px 20px; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; font-size: 0.7rem; letter-spacing: 2px; color: #05ffa1; justify-content: space-between; align-items: center;">
+                <span class="welcome-text">CITIZEN REGISTERED — WELCOME TO THE GRID</span>
+                <span style="cursor: pointer; font-size: 1rem;" onclick="this.parentElement.style.display='none'">✕</span>
+            </div>
+            
+            <header>
+                <div class="logo-section">
+                    <h1>CONSENSIFY</h1>
+                    <div class="subtitle">SAN VICEROY PUBLIC CONSENSUS GATE</div>
+                </div>
+                <div class="master-truth">
+                    <div class="label">MASTER TRUTH</div>
+                    <div class="value" id="global-average">0%</div>
+                </div>
+            </header>
+
+            <div class="district-toggle">
+                <button class="district-btn active" data-district="Old Dock">OLD DOCK</button>
+                <button class="district-btn" data-district="Midtown">MIDTOWN</button>
+            </div>
+
+            <div class="main-grid">
+                <div class="consensus-section">
+                    <h2>CONSENSUS BOARD</h2>
+                    <div class="cards-container" id="cards-container"></div>
+
+                    <div class="protocol-status" id="protocol-status">
+                        <div class="protocol-label">PROTOCOL ACTIVE</div>
+                        <div class="protocol-timer" id="protocol-timer">00:00:00</div>
+                    </div>
+
+                    <div class="commit-trail">
+                        <div class="commit-trail-title">// PUBLIC COMMITMENT STREAM</div>
+                        <div id="commit-trail-content"></div>
+                    </div>
+                </div>
+
+                <div class="side-panel">
+                    <div class="panel-box">
+                        <div class="panel-title">INFLUENCER CATALYSTS</div>
+                        <div id="influencers"></div>
+                    </div>
+
+                    <div class="panel-box">
+                        <div class="panel-title">HEAT METERS</div>
+                        <div class="heat-meters">
+                            <div class="heat-meter" id="panic-meter">
+                                <div class="heat-label">
+                                    PANIC <span class="heat-trend" id="panic-trend"></span>
+                                </div>
+                                <div class="heat-bar">
+                                    <div class="heat-zone-markers">
+                                        <div class="zone-marker" style="bottom:60%"><span>Critical</span></div>
+                                        <div class="zone-marker" style="bottom:30%"><span>Elevated</span></div>
+                                        <div class="zone-marker" style="bottom:0%"><span>Stable</span></div>
+                                    </div>
+                                    <div class="heat-fill panic" id="panic-fill" style="height:0%"></div>
+                                    <div class="heat-projection" id="panic-projection"></div>
+                                </div>
+                                <div class="heat-value panic" id="panic-value">0%</div>
+                                <div class="heat-clarity">Drops as Calm consensus rises.</div>
+                                <div class="heat-hint">What cools this down?<br>Increase Calm · Open safe routes</div>
+                            </div>
+                            <div class="heat-meter" id="rumor-meter">
+                                <div class="heat-label">
+                                    RUMOR <span class="heat-trend" id="rumor-trend"></span>
+                                </div>
+                                <div class="heat-bar">
+                                    <div class="heat-zone-markers">
+                                        <div class="zone-marker" style="bottom:60%"><span>Critical</span></div>
+                                        <div class="zone-marker" style="bottom:30%"><span>Elevated</span></div>
+                                        <div class="zone-marker" style="bottom:0%"><span>Stable</span></div>
+                                    </div>
+                                    <div class="heat-fill rumor" id="rumor-fill" style="height:0%"></div>
+                                    <div class="heat-projection" id="rumor-projection"></div>
+                                </div>
+                                <div class="heat-value rumor" id="rumor-value">0%</div>
+                                <div class="heat-clarity">Drops as Verify consensus rises.</div>
+                                <div class="heat-hint">What cools this down?<br>Increase Verify · Fact-check quests</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DISTRICTS PAGE -->
+        <div id="page-districts" class="page">
+            <h2 class="page-title">DISTRICT OVERVIEW</h2>
+            <div class="district-grid" id="district-grid"></div>
+        </div>
+
+        <!-- INFLUENCERS PAGE -->
+        <div id="page-influencers" class="page">
+            <h2 class="page-title">INFLUENCER CATALYSTS</h2>
+            <div class="influencer-grid" id="influencer-grid"></div>
+        </div>
+
+        <!-- COMMIT PAGE -->
+        <div id="page-commit" class="page">
+            <h2 class="page-title">PUBLIC COMMITMENT</h2>
+            
+            <div class="commit-step">
+                <div class="step-label">01 // SELECT DISTRICT</div>
+                <div class="step-options" id="commit-district-options">
+                    <div class="step-option selected" data-district="Old Dock">
+                        <div class="option-title">OLD DOCK</div>
+                        <div class="option-desc">Industrial waterfront</div>
+                    </div>
+                    <div class="step-option" data-district="Midtown">
+                        <div class="option-title">MIDTOWN</div>
+                        <div class="option-desc">Commercial hub</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="commit-step">
+                <div class="step-label">02 // SELECT TOKEN TYPE</div>
+                <div class="step-options" id="commit-token-options">
+                    <div class="step-option selected" data-token="calm">
+                        <div class="option-title">CALM</div>
+                        <div class="option-desc">Safe routes unlock</div>
+                    </div>
+                    <div class="step-option" data-token="verify">
+                        <div class="option-title">VERIFY</div>
+                        <div class="option-desc">Panic reduced</div>
+                    </div>
+                    <div class="step-option" data-token="aid">
+                        <div class="option-title">AID</div>
+                        <div class="option-desc">Emergency surge</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="commit-preview" id="commit-preview">
+                <div class="commit-preview-title">// COMMITMENT PREVIEW</div>
+                <div class="commit-preview-text" id="commit-preview-text">
+                    You are publicly committing to <strong>CALM</strong> mode in <strong>OLD DOCK</strong>.
+                    <br><br>
+                    If consensus reaches 60%, safe routes will unlock city-wide.
+                </div>
+            </div>
+
+            <button class="commit-confirm-btn" id="commit-confirm-btn" onclick="executeCommit()">
+                LOCK TOKEN
+            </button>
+        </div>
+
+        <!-- TRANSPARENCY PAGE -->
+        <div id="page-transparency" class="page">
+            <h2 class="page-title">SYSTEM TRANSPARENCY</h2>
+            
+            <div class="transparency-section">
+                <h3>PUBLIC COMMITMENT (NOT CURRENCY)</h3>
+                <p>Consensify tokens represent public commitments, not monetary value. They are designed to measure voluntary community alignment, not as rewards or incentives. No tokens can be bought, sold, or exchanged for anything of material value.</p>
+            </div>
+
+            <div class="transparency-section">
+                <h3>AGGREGATED METRIC LOGIC (NO SURVEILLANCE)</h3>
+                <p>All metrics are computed from aggregate community signals. Individual votes or commitments are never tracked, stored, or linkable to specific users.</p>
+                <ul>
+                    <li>No personal data collection</li>
+                    <li>No identity verification</li>
+                    <li>No behavioral profiling</li>
+                    <li>Only district-level aggregates visible</li>
+                </ul>
+            </div>
+
+            <div class="transparency-section">
+                <h3>VOLUNTARY PARTICIPATION</h3>
+                <p>All interactions are optional. The system is designed for communities that choose to coordinate without coercion.</p>
+                <ul>
+                    <li>Always opt-in</li>
+                    <li>No penalties for non-participation</li>
+                    <li>No social pressure mechanisms</li>
+                </ul>
+            </div>
+
+            <div class="transparency-section">
+                <h3>TOKEN MECHANICS</h3>
+                <ul>
+                    <li><strong>Throttle:</strong> 30-second cooldown between commits</li>
+                    <li><strong>Diminishing Returns:</strong> -20% effectiveness per successive commit</li>
+                    <li><strong>Cap:</strong> Maximum +15% shift per option per session</li>
+                    <li><strong>Wallet:</strong> 3 tokens per type, refreshes on page reload</li>
+                </ul>
+            </div>
+
+            <div class="transparency-section">
+                <h3>INFLUENCER CATALYST RULES</h3>
+                <p>Influencers provide a 1.5x momentum multiplier when their stance matches your commit. However, they cannot command outcomes—they can only catalyze existing momentum.</p>
+            </div>
+        </div>
+        
+        <!-- REPORTS PAGE -->
+        <div id="page-reports" class="page">
+
+          <div class="page-title">VERIFIED TRUTH PIPELINE</div>
+
+          <!-- PIPELINE VISUALIZER — always visible at top of page -->
+          <div id="pipeline-visualizer">
+            <div class="pipeline-stage authority">
+              <div class="pipeline-stage-number">STAGE 1</div>
+              <div class="pipeline-stage-label">AUTHORITY</div>
+              <div class="pipeline-stage-desc">Drafts &amp; submits report to council</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-stage council">
+              <div class="pipeline-stage-number">STAGE 2</div>
+              <div class="pipeline-stage-label">VALIDATION COUNCIL</div>
+              <div class="pipeline-stage-desc">
+                Eligible influencers validate or challenge
+                <br>
+                <span id="viz-eligible-count"
+                  style="color:var(--neon-purple);font-family:Orbitron;
+                  font-size:0.65rem;">0 ELIGIBLE</span>
+              </div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-stage public">
+              <div class="pipeline-stage-number">STAGE 3</div>
+              <div class="pipeline-stage-label">PUBLIC GATE</div>
+              <div class="pipeline-stage-desc">Citizens vote Accept or Dispute</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-stage canonical">
+              <div class="pipeline-stage-number">FINAL</div>
+              <div class="pipeline-stage-label">CANONICAL</div>
+              <div class="pipeline-stage-desc">
+                Enters city truth record
+                <br>
+                <span id="viz-canonical-count"
+                  style="color:var(--neon-green);font-family:Orbitron;
+                  font-size:0.65rem;">0 CONFIRMED</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- AUTHORITY PUBLISH PANEL — only visible if CURRENT_USER.role === 'authority' -->
+          <div id="authority-publish-panel" style="display:none;">
+            <div class="publish-form-title">// DRAFT CITY REPORT</div>
+
+            <div class="publish-field">
+              <label class="publish-label">REPORT TITLE</label>
+              <input class="publish-input" id="pub-title"
+                placeholder="e.g. Water Supply Status — Old Dock" type="text">
+            </div>
+
+            <div class="publish-field">
+              <label class="publish-label">REPORT BODY</label>
+              <textarea class="publish-textarea" id="pub-body"
+                placeholder="State the facts clearly. This will be reviewed by the Validation Council before reaching citizens."></textarea>
+            </div>
+
+            <div class="publish-field">
+              <label class="publish-label">URGENCY LEVEL</label>
+              <div class="urgency-selector" id="urgency-selector">
+                <div class="urgency-option selected routine" data-urgency="routine">ROUTINE</div>
+                <div class="urgency-option elevated" data-urgency="elevated">ELEVATED</div>
+                <div class="urgency-option critical" data-urgency="critical">CRITICAL</div>
+              </div>
+            </div>
+
+            <div class="publish-field">
+              <label class="publish-label">VALIDATOR THRESHOLD</label>
+              <div style="display:flex;align-items:center;gap:15px;margin-top:6px;">
+                <input type="range" id="pub-threshold" min="40" max="80"
+                  value="60" step="5"
+                  style="flex:1;accent-color:var(--neon-red);">
+                <span id="pub-threshold-display"
+                  style="font-family:Orbitron;font-size:0.9rem;
+                  color:var(--neon-red);min-width:40px;">60%</span>
+              </div>
+              <div style="font-size:0.65rem;color:var(--text-dim);
+                margin-top:4px;font-family:Orbitron;letter-spacing:1px;">
+                % OF ELIGIBLE VALIDATORS REQUIRED TO ADVANCE
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;">
+              <button class="publish-submit-btn" id="publish-report-btn">
+                SUBMIT TO VALIDATION COUNCIL
+              </button>
+              <div id="publish-error"
+                style="font-family:Orbitron;font-size:0.65rem;
+                color:var(--neon-red);letter-spacing:1px;display:none;">
+              </div>
+            </div>
+          </div>
+
+          <!-- PENDING REPORTS — Stage 1, visible to all but actionable by authority only -->
+          <div id="pending-reports-section">
+            <div class="reports-section-title">
+              <span class="stage-badge stage-1">STAGE 1</span>
+              PENDING VERIFICATION
+            </div>
+            <div id="pending-reports-list"></div>
+            <div id="pending-empty" class="empty-state">
+              NO REPORTS PENDING VERIFICATION
+            </div>
+          </div>
+
+          <!-- DELIBERATION REPORTS — Stage 2, actionable by eligible influencers -->
+          <div id="deliberation-reports-section">
+            <div class="reports-section-title">
+              <span class="stage-badge stage-2">STAGE 2</span>
+              INFLUENCER VALIDATION COUNCIL
+            </div>
+            <div id="deliberation-reports-list"></div>
+            <div id="deliberation-empty" class="empty-state">
+              NO REPORTS IN COUNCIL
+            </div>
+          </div>
+
+          <!-- PUBLIC GATES — Stage 3, actionable by citizens -->
+          <div id="public-reports-section">
+            <div class="reports-section-title">
+              <span class="stage-badge stage-3">STAGE 3</span>
+              PUBLIC CONSENSUS GATES
+            </div>
+            <div id="public-reports-list"></div>
+            <div id="public-empty" class="empty-state">
+              NO REPORTS OPEN FOR PUBLIC VOTE
+            </div>
+          </div>
+
+          <!-- CANONICAL TRUTH RECORD — permanent log -->
+          <div id="canonical-section">
+            <div class="reports-section-title">
+              <span class="stage-badge canonical">CANONICAL</span>
+              CITY TRUTH RECORD
+            </div>
+            <div id="canonical-list"></div>
+            <div id="canonical-empty" class="empty-state">
+              NO CANONICAL REPORTS YET
+            </div>
+          </div>
+
+        </div>
+
+        <footer>
+            <span class="commitment">PUBLIC COMMITMENT (NOT CURRENCY)</span> • 
+            <span class="metrics">AGGREGATED METRIC LOGIC (NO SURVEILLANCE)</span> • 
+            VOLUNTARY PARTICIPATION • 
+            <span class="metrics">TOKEN THROTTLE: 30s</span> • 
+            <span class="metrics">DIMINISHING RETURNS: -20%/click</span>
+        </footer>
+    </div>
+
+    <script>
+        // BEHAVIOR MODULATION LOGIC:
+        // IF Calm > 50%: Weighted NPC probability for "De-escalate" = 0.7
+        // IF Threshold Hit: Trigger "World_Event_Safe_Zone_Open"
+
+        // ⚠ DEMO ONLY: passwords stored in plaintext for hackathon presentation.
+        // Production deployment would use hashed credentials (bcrypt/argon2)
+        // and a persistent backend. No real user data is collected here.
+        const USER_STORE = {
+            'alex_v': { password: 'password', role: 'citizen', displayName: 'Alex_Viceroy', district: 'Old Dock', respectScore: 850, validatorReputation: { totalValidated: 0, provenAccurate: 0, laterDisputed: 0, accuracyRate: 100 } },
+            'maya_d': { password: 'password', role: 'influencer', displayName: 'Maya_OldDock', district: 'Old Dock', respectScore: 4200, followerWeight: 1.4, followers: 12500, validatorReputation: { totalValidated: 12, provenAccurate: 11, laterDisputed: 1, accuracyRate: 91.6 } },
+            'cmd_01': { password: 'password', role: 'authority', displayName: 'City Command', district: 'All Districts', respectScore: null, validatorReputation: { totalValidated: 0, provenAccurate: 0, laterDisputed: 0, accuracyRate: 100 } }
+        };
+
+        const REPORT_STORE = [];
+        const VALIDATOR_THRESHOLD_SCORE = 500;
+
+        function getEligibleValidators() {
+          return Object.entries(USER_STORE)
+            .filter(([_, u]) => u.role === 'influencer' && u.respectScore >= VALIDATOR_THRESHOLD_SCORE)
+            .map(([username, u]) => ({ username, ...u }));
+        }
+
+        function getValidatorProgress(report) {
+          const eligible = getEligibleValidators().length;
+          if (eligible === 0) return 0;
+          const validated = report.validations.filter(v => v.action === 'validate').length;
+          return Math.round((validated / eligible) * 100);
+        }
+
+        function isEligibleValidator(username) {
+          const user = USER_STORE[username];
+          return user && user.role === 'influencer' && user.respectScore >= VALIDATOR_THRESHOLD_SCORE;
+        }
+
+        let CURRENT_USER = null;
+        let REG_SELECTED_ROLE = 'citizen';
+        let REG_SELECTED_DISTRICT = 'Old Dock';
+        let JUST_REGISTERED = false;
+
+        const TOKEN_WALLET = {
+            calm: 3,
+            verify: 3,
+            aid: 3
+        };
+
+        const CITY_STATE = {
+            districts: {
+                "Old Dock": { calm: 45, verify: 30, aid: 25 },
+                "Midtown": { calm: 38, verify: 42, aid: 20 }
+            },
+            global: { calm: 0, verify: 0, aid: 0 },
+            gateActive: false,
+            currentDistrict: "Old Dock",
+            lockThrottle: {},
+            diminishingReturns: {},
+            influencerMomentum: {
+                "Vex_Neon":   { stance: "calm",   active: true,  bio: "Street sage of the docks",    momentum: 65, integrity: 100, lastStanceChange: 0 },
+                "Truth_Leak": { stance: "verify", active: true,  bio: "Information broker",          momentum: 40, integrity: 100, lastStanceChange: 0 },
+                "Zero_Day":   { stance: "aid",    active: false, bio: "Emergency response coord",    momentum: 20, integrity: 100, lastStanceChange: 0 }
+            },
+            protocolStartTime: null,
+            baseValues: {},
+            commitTrail: []
+        };
+
+        const HEAT_STATE = {
+            history: { panic: [], rumor: [] },
+            smoothed: { panic: 50, rumor: 30 },
+            getTrend(type) {
+                const history = this.history[type];
+                if (history.length < 3) return 'stable';
+                const recent = history.slice(-5);
+                const avg = recent.reduce((a, b) => a + b, 0) / recent.length;
+                const delta = recent[recent.length - 1] - avg;
+                if (delta > 3)  return 'rising';
+                if (delta < -3) return 'falling';
+                return 'stable';
+            },
+            addReading(type, value) {
+                this.history[type].push(value);
+                if (this.history[type].length > 10) this.history[type].shift();
+                const w = this.history[type].slice(-5);
+                this.smoothed[type] = Math.round(
+                    w.reduce((a, b) => a + b, 0) / w.length
+                );
+            }
+        };
+
+        const USER_STATE = {
+            commitHistory: [],
+            lastCommitTime: 0,
+            consecutiveSameType: 0,
+            lastType: null,
+            getConfidenceWeight(type) {
+                const now = Date.now();
+                const timeSince = now - this.lastCommitTime;
+                let weight = 1.0;
+                if (this.lastType === type && this.consecutiveSameType >= 2) {
+                    weight += 0.05;
+                }
+                if (timeSince < 120000 && this.lastType === type) {
+                    weight += 0.03;
+                }
+                if (CURRENT_USER?.district) {
+                    weight += 0.02;
+                }
+                return Math.min(1.10, parseFloat(weight.toFixed(2)));
+            },
+            recordCommit(type) {
+                if (this.lastType === type) {
+                    this.consecutiveSameType++;
+                } else {
+                    this.consecutiveSameType = 1;
+                    this.lastType = type;
+                }
+                this.lastCommitTime = Date.now();
+                this.commitHistory.push({ type, time: Date.now() });
+                if (this.commitHistory.length > 20) this.commitHistory.shift();
+            }
+        };
+
+        const INFLUENCER_AVATARS = {
+            'Vex_Neon': {
+                stance: 'calm',
+                svg: `<svg viewBox="0 0 40 40" class="avatar-svg" aria-label="Vex_Neon profile image">
+                    <defs>
+                        <linearGradient id="vexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00f2ff"/>
+                            <stop offset="100%" style="stop-color:#0a0f14"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="20" cy="20" r="18" fill="url(#vexGrad)" opacity="0.3"/>
+                    <path d="M12 28 L12 18 L16 12 L24 12 L28 18 L28 28" fill="none" stroke="#00f2ff" stroke-width="1.5"/>
+                    <circle cx="15" cy="18" r="2" fill="#00f2ff"/>
+                    <circle cx="25" cy="18" r="2" fill="#00f2ff"/>
+                    <path d="M17 24 L20 22 L23 24" fill="none" stroke="#00f2ff" stroke-width="1"/>
+                    <rect x="10" y="30" width="20" height="2" fill="#00f2ff" opacity="0.5"/>
+                </svg>`
+            },
+            'Truth_Leak': {
+                stance: 'verify',
+                svg: `<svg viewBox="0 0 40 40" class="avatar-svg" aria-label="Truth_Leak profile image">
+                    <defs>
+                        <linearGradient id="truthGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#05ffa1"/>
+                            <stop offset="100%" style="stop-color:#0a0f14"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="20" cy="20" r="18" fill="url(#truthGrad)" opacity="0.3"/>
+                    <path d="M10 14 L10 28 L30 28 L30 14 L26 10 L14 10 Z" fill="none" stroke="#05ffa1" stroke-width="1.5"/>
+                    <line x1="14" y1="18" x2="18" y2="22" stroke="#05ffa1" stroke-width="1.5"/>
+                    <line x1="26" y1="18" x2="22" y2="22" stroke="#05ffa1" stroke-width="1.5"/>
+                    <circle cx="20" cy="24" r="2" fill="#05ffa1"/>
+                    <line x1="13" y1="12" x2="27" y2="12" stroke="#05ffa1" stroke-width="1" opacity="0.5"/>
+                </svg>`
+            },
+            'Zero_Day': {
+                stance: 'aid',
+                svg: `<svg viewBox="0 0 40 40" class="avatar-svg" aria-label="Zero_Day profile image">
+                    <defs>
+                        <linearGradient id="zeroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#bc13fe"/>
+                            <stop offset="100%" style="stop-color:#0a0f14"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="20" cy="20" r="18" fill="url(#zeroGrad)" opacity="0.3"/>
+                    <circle cx="20" cy="14" r="6" fill="none" stroke="#bc13fe" stroke-width="1.5"/>
+                    <line x1="20" y1="20" x2="20" y2="28" stroke="#bc13fe" stroke-width="2"/>
+                    <line x1="14" y1="24" x2="26" y2="24" stroke="#bc13fe" stroke-width="1.5"/>
+                    <line x1="16" y1="28" x2="24" y2="28" stroke="#bc13fe" stroke-width="1.5"/>
+                    <circle cx="20" cy="14" r="1.5" fill="#bc13fe"/>
+                    <path d="M8 8 L12 12 M32 8 L28 12" stroke="#bc13fe" stroke-width="1" opacity="0.6"/>
+                </svg>`
+            }
+        };
+
+        function getInfluencerAvatar(name, fallbackChar) {
+            const avatar = INFLUENCER_AVATARS[name];
+            if (avatar) {
+                return `<div class="avatar ${avatar.stance}" title="${name} profile">${avatar.svg}</div>`;
+            }
+            return `<div class="avatar-fallback">${fallbackChar}</div>`;
+        }
+
+        function getSidebarAvatar(name, stance, fallbackChar) {
+            const avatar = INFLUENCER_AVATARS[name];
+            if (avatar) {
+                return `<div class="influencer-avatar ${avatar.stance}" title="${name} profile" role="img" aria-label="${name} profile image">${avatar.svg}</div>`;
+            }
+            return `<div class="influencer-avatar">${fallbackChar}</div>`;
+        }
+
+        function triggerEchoBand(stance) {
+            const band = document.querySelector(`.echo-band[data-stance="${stance}"]`);
+            const mirror = document.getElementById(`mirror-${stance}`);
+            if (band) {
+                band.classList.remove('active');
+                void band.offsetWidth;
+                band.classList.add('active');
+                setTimeout(() => band.classList.remove('active'), 1500);
+            }
+            if (mirror) {
+                mirror.classList.add('active');
+                setTimeout(() => mirror.classList.remove('active'), 2000);
+            }
+        }
+
+        function updateInfluencerIntegrity(name, newStance) {
+            const inf = CITY_STATE.influencerMomentum[name];
+            if (!inf) return;
+            const now = Date.now();
+            const timeSince = now - (inf.lastStanceChange || 0);
+            if (inf.stance !== newStance) {
+                if      (timeSince < 60000)  inf.integrity = Math.max(0, inf.integrity - 25);
+                else if (timeSince < 300000) inf.integrity = Math.max(0, inf.integrity - 10);
+                else                         inf.integrity = Math.max(0, inf.integrity - 5);
+                inf.stance = newStance;
+                inf.lastStanceChange = now;
+            } else {
+                if (timeSince > 120000) inf.integrity = Math.min(100, inf.integrity + 2);
+            }
+        }
+
+        function getEffectiveMultiplier(influencerName) {
+            const inf = CITY_STATE.influencerMomentum[influencerName];
+            if (!inf || !inf.active) return 1;
+            if      (inf.integrity >= 70) return 1.5;
+            else if (inf.integrity >= 50) return 1.5 * 0.85;
+            else if (inf.integrity >= 30) return 1.5 * 0.7;
+            else                          return Math.max(1.1, 1.5 * 0.5);
+        }
+
+        function recoverIntegrity() {
+            Object.keys(CITY_STATE.influencerMomentum).forEach(name => {
+                const inf = CITY_STATE.influencerMomentum[name];
+                if (inf.integrity < 100 && inf.integrity > 0) {
+                    if (Date.now() - (inf.lastStanceChange || 0) > 60000) {
+                        inf.integrity = Math.min(100, inf.integrity + 1);
+                    }
+                }
+            });
+            const grid = document.getElementById('influencer-grid');
+            if (grid && grid.children.length > 0) renderInfluencerGrid();
+        }
+
+        setInterval(recoverIntegrity, 30000);
+
+        const COMMIT_STATE = {
+            district: "Old Dock",
+            token: "calm"
+        };
+
+        // REGISTRATION AND LOGIN LOGIC
+        function switchTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const tabSignin = document.getElementById('tab-signin');
+            const tabRegister = document.getElementById('tab-register');
+            const hintPanel = document.getElementById('credential-hints');
+
+            if (tab === 'signin') {
+                loginForm.style.display = 'flex';
+                registerForm.style.display = 'none';
+                tabSignin.classList.add('active');
+                tabRegister.classList.remove('active');
+                if (hintPanel) hintPanel.style.display = 'block';
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'flex';
+                tabSignin.classList.remove('active');
+                tabRegister.classList.add('active');
+                if (hintPanel) hintPanel.style.display = 'none';
+            }
+
+            document.getElementById('login-error').style.display = 'none';
+            document.getElementById('register-error').style.display = 'none';
+        }
+
+        function showRegisterError(message, type = 'error') {
+            const el = document.getElementById('register-error');
+            el.textContent = message;
+            el.style.display = 'block';
+            el.style.color = type === 'success' ? 'var(--neon-green, #05ffa1)' : 'var(--neon-red)';
+        }
+
+        function attemptRegister() {
+            const displayName = document.getElementById('reg-displayname').value.trim();
+            const username = document.getElementById('reg-username').value.trim().toLowerCase();
+            const password = document.getElementById('reg-password').value;
+            const confirm = document.getElementById('reg-confirm').value;
+            const errorEl = document.getElementById('register-error');
+
+            if (!displayName || !username || !password || !confirm) {
+                showRegisterError('ALL FIELDS ARE REQUIRED');
+                return;
+            }
+
+            if (!/^[a-z0-9_]+$/.test(username)) {
+                showRegisterError('CITIZEN ID: LOWERCASE, NUMBERS, UNDERSCORES ONLY');
+                return;
+            }
+
+            if (username.length < 3) {
+                showRegisterError('CITIZEN ID MUST BE AT LEAST 3 CHARACTERS');
+                return;
+            }
+
+            if (USER_STORE[username]) {
+                showRegisterError('CITIZEN ID ALREADY REGISTERED — CHOOSE ANOTHER');
+                return;
+            }
+
+            if (password.length < 6) {
+                showRegisterError('ACCESS CODE MUST BE AT LEAST 6 CHARACTERS');
+                return;
+            }
+
+            if (password !== confirm) {
+                showRegisterError('ACCESS CODES DO NOT MATCH');
+                document.getElementById('reg-confirm').value = '';
+                document.getElementById('reg-confirm').focus();
+                return;
+            }
+
+            if (displayName.length < 2) {
+                showRegisterError('DISPLAY NAME TOO SHORT');
+                return;
+            }
+
+            const newUser = {
+                password: password,
+                role: REG_SELECTED_ROLE,
+                displayName: displayName,
+                district: REG_SELECTED_ROLE === 'authority' ? 'All Districts' : REG_SELECTED_DISTRICT,
+                respectScore: REG_SELECTED_ROLE === 'authority' ? null :
+                              REG_SELECTED_ROLE === 'influencer' ? 1000 : 500,
+                validatorReputation: {
+                    totalValidated: 0,
+                    provenAccurate: 0,
+                    laterDisputed: 0,
+                    accuracyRate: 100
+                }
+            };
+
+            if (REG_SELECTED_ROLE === 'influencer') {
+                newUser.followerWeight = 1.2;
+                newUser.followers = 5000;
+            }
+
+            USER_STORE[username] = newUser;
+            renderRegistry();
+
+            const btn = document.getElementById('register-btn');
+            btn.textContent = 'CITIZEN REGISTERED';
+            btn.style.background = 'var(--neon-green, #05ffa1)';
+            btn.style.color = 'var(--bg-deep)';
+
+            JUST_REGISTERED = true;
+
+            showRegisterError(`WELCOME, ${displayName.toUpperCase()}. AUTHENTICATING...`, 'success');
+
+            setTimeout(() => {
+                document.getElementById('login-username').value = username;
+                document.getElementById('login-password').value = password;
+                switchTab('signin');
+                
+                // Reset register form UI slightly back
+                btn.textContent = {citizen: 'REGISTER CITIZEN', influencer: 'REGISTER AS CATALYST', authority: 'REGISTER AUTHORITY'}[REG_SELECTED_ROLE];
+                btn.style.background = 'var(--neon-purple)';
+                btn.style.color = 'var(--bg-deep)';
+                document.getElementById('reg-displayname').value = '';
+                document.getElementById('reg-username').value = '';
+                document.getElementById('reg-password').value = '';
+                document.getElementById('reg-confirm').value = '';
+                errorEl.style.display = 'none';
+                
+                setTimeout(() => attemptLogin(), 300);
+            }, 1200);
+        }
+
+        function attemptLogin() {
+            const un = document.getElementById('login-username').value.trim().toLowerCase();
+            const pw = document.getElementById('login-password').value;
+            const err = document.getElementById('login-error');
+            if (!un || !pw) {
+                err.textContent = 'CREDENTIALS REQUIRED';
+                err.style.display = 'block';
+                return;
+            }
+            if (USER_STORE[un] && USER_STORE[un].password === pw) {
+                CURRENT_USER = USER_STORE[un];
+                err.style.display = 'none';
+                onLoginSuccess();
+            } else {
+                err.textContent = 'ACCESS DENIED';
+                err.style.display = 'block';
+            }
+        }
+
+        function onLoginSuccess() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-board').classList.add('active');
+            document.querySelector('nav').style.display = 'flex';
+            
+            if (JUST_REGISTERED) {
+                const banner = document.getElementById('welcome-banner');
+                if (banner) {
+                    banner.querySelector('.welcome-text').textContent = 
+                        `CITIZEN REGISTERED — WELCOME TO THE GRID, ${CURRENT_USER.displayName.toUpperCase()}`;
+                    banner.style.display = 'flex';
+                    JUST_REGISTERED = false;
+                }
+            }
+            
+            updateNavForRole();
+            renderAll();
+        }
+
+        function updateNavForRole() {
+            let badge = document.getElementById('nav-user-badge');
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.id = 'nav-user-badge';
+                badge.style.fontFamily = 'Orbitron';
+                badge.style.fontSize = '0.7rem';
+                badge.style.color = 'var(--neon-blue)';
+                badge.style.border = '1px solid var(--neon-blue)';
+                badge.style.padding = '8px 15px';
+                badge.style.marginLeft = 'auto';
+                document.querySelector('nav').appendChild(badge);
+            }
+            const score = CURRENT_USER.respectScore !== null ? CURRENT_USER.respectScore : 'COMMAND';
+            badge.innerHTML = `${CURRENT_USER.displayName} | ${CURRENT_USER.role.toUpperCase()} | SCORE: ${score} <span style="cursor:pointer; color:var(--neon-red); margin-left:10px;" onclick="logout()">[LOGOUT]</span>`;
+        }
+
+        function logout() {
+            CURRENT_USER = null;
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-login').classList.add('active');
+            document.querySelector('nav').style.display = 'none';
+            document.getElementById('welcome-banner').style.display = 'none';
+            
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+            
+            const badge = document.getElementById('nav-user-badge');
+            if (badge) badge.remove();
+            
+            switchTab('signin');
+        }
+
+        function renderRegistry() {
+            const list = document.getElementById('registry-list');
+            if (!list) return;
+
+            const roleColors = {
+                citizen: 'var(--neon-blue)',
+                influencer: 'var(--neon-purple)',
+                authority: 'var(--neon-red)'
+            };
+
+            list.innerHTML = Object.entries(USER_STORE).map(([username, user]) => `
+                <div style="display:flex;align-items:center;gap:10px; padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                    <div style="width:6px;height:6px;border-radius:50%; background:${roleColors[user.role]};flex-shrink:0;"></div>
+                    <span style="font-family:'Rajdhani', sans-serif;font-size:0.85rem; color:var(--text-bright);flex:1;">${user.displayName}</span>
+                    <span style="font-family:'Orbitron', sans-serif;font-size:0.55rem; color:${roleColors[user.role]};letter-spacing:1px;">
+                        ${user.role.toUpperCase()}</span>
+                    <span style="font-size:0.65rem;color:var(--text-dim);">
+                        ${user.district}</span>
+                </div>
+            `).join('');
+        }
+
+        // EVENT LISTENERS FOR REGISTRATION
+        document.getElementById('register-btn')?.addEventListener('click', attemptRegister);
+
+        document.getElementById('reg-confirm')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') attemptRegister();
+        });
+
+        document.getElementById('login-password')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') attemptLogin();
+        });
+
+        document.getElementById('reg-role-options')?.addEventListener('click', (e) => {
+            const card = e.target.closest('.reg-option');
+            if (!card) return;
+
+            document.querySelectorAll('#reg-role-options .reg-option').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+
+            REG_SELECTED_ROLE = card.dataset.role;
+
+            updateRoleCardColors();
+
+            const districtSection = document.getElementById('reg-district-section');
+            if (REG_SELECTED_ROLE === 'authority') {
+                districtSection.style.display = 'none';
+            } else {
+                districtSection.style.display = 'block';
+            }
+
+            const labels = {
+                citizen: 'REGISTER CITIZEN',
+                influencer: 'REGISTER AS CATALYST',
+                authority: 'REGISTER AUTHORITY'
+            };
+            document.getElementById('register-btn').textContent = labels[REG_SELECTED_ROLE];
+        });
+
+        function updateRoleCardColors() {
+            const styles = {
+                citizen: { color: 'var(--neon-blue)', shadow: 'rgba(0, 242, 255, 0.2)' },
+                influencer: { color: 'var(--neon-purple)', shadow: 'rgba(188, 19, 254, 0.2)' },
+                authority: { color: 'var(--neon-red)', shadow: 'rgba(255, 42, 109, 0.2)' }
+            };
+
+            document.querySelectorAll('#reg-role-options .reg-option').forEach(card => {
+                const role = card.dataset.role;
+                const style = styles[role];
+                if (card.classList.contains('selected')) {
+                    card.style.borderColor = style.color;
+                    card.style.boxShadow = `0 0 15px ${style.shadow}`;
+                    card.style.backgroundColor = style.shadow.replace('0.2)', '0.1)');
+                } else {
+                    card.style.borderColor = 'var(--border-glow)';
+                    card.style.boxShadow = 'none';
+                    card.style.backgroundColor = 'var(--bg-panel)';
+                }
+            });
+        }
+
+        document.getElementById('reg-district-options')?.addEventListener('click', (e) => {
+            const card = e.target.closest('.reg-option');
+            if (!card) return;
+
+            document.querySelectorAll('#reg-district-options .reg-option').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+
+            REG_SELECTED_DISTRICT = card.dataset.district;
+        });
+
+
+        // EXISTING APP LOGIC
+        function route() {
+            if (!CURRENT_USER) {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page-login').classList.add('active');
+                return;
+            }
+
+            const page = location.hash.replace('#', '') || 'board';
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${page}`)?.classList.add('active');
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.toggle('active', link.dataset.page === page);
+            });
+
+            if (page === 'districts') renderDistrictGrid();
+            if (page === 'influencers') renderInfluencerGrid();
+            if (page === 'board') renderAll();
+            if (page === 'reports') renderReportsPage();
+        }
+
+        window.addEventListener('hashchange', route);
+
+        function toggleScreenMode() {
+            document.body.classList.toggle('screen-mode');
+        }
+
+        function calculateGlobal() {
+            const districts = Object.keys(CITY_STATE.districts);
+            const count = districts.length;
+            
+            CITY_STATE.global.calm = Math.round(
+                districts.reduce((sum, d) => sum + CITY_STATE.districts[d].calm, 0) / count
+            );
+            CITY_STATE.global.verify = Math.round(
+                districts.reduce((sum, d) => sum + CITY_STATE.districts[d].verify, 0) / count
+            );
+            CITY_STATE.global.aid = Math.round(
+                districts.reduce((sum, d) => sum + CITY_STATE.districts[d].aid, 0) / count
+            );
+        }
+
+        function renderCards() {
+            const container = document.getElementById('cards-container');
+            const district = CITY_STATE.currentDistrict;
+            const values = CITY_STATE.districts[district];
+            const base = CITY_STATE.baseValues[district] || values;
+
+            container.innerHTML = '';
+
+            const options = [
+                { key: 'calm', label: 'CALM', effect: 'Safe routes unlock', class: 'calm' },
+                { key: 'verify', label: 'VERIFY', effect: 'Panic behavior reduced', class: 'verify' },
+                { key: 'aid', label: 'AID', effect: 'Emergency response surge', class: 'aid' }
+            ];
+
+            options.forEach(opt => {
+                const value = values[opt.key];
+                const isRedlining = value >= 55 && value < 60;
+                const isActiveProtocol = value >= 60;
+                const throttle = CITY_STATE.lockThrottle[opt.key];
+                const isThrottled = throttle && Date.now() < throttle;
+                const diminishing = CITY_STATE.diminishingReturns[district]?.[opt.key] || 0;
+                const diminishingClass = diminishing > 0 ? 'diminshing' : '';
+                const walletDepleted = TOKEN_WALLET[opt.key] <= 0;
+
+                const confidenceWeight = USER_STATE.getConfidenceWeight(opt.key);
+                const hasConfidenceBonus = confidenceWeight > 1.0;
+
+                const card = document.createElement('div');
+                card.className = `consensus-card ${isActiveProtocol ? 'active-protocol' : ''} ${walletDepleted ? 'token-depleted' : ''}`;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-title ${opt.class}">${opt.label}</div>
+                    </div>
+                    <div class="card-percentage ${opt.class}">${value}%</div>
+                    <div class="threshold-marker ${value >= 55 ? 'triggered' : ''}">
+                        ${value >= 60 ? '✓ UNLOCKED' : 'THRESHOLD: 60%'}
+                    </div>
+                    <div class="bar-container">
+                        <div class="threshold-line"></div>
+                        <div class="bar-fill ${opt.class} ${isRedlining ? 'redline' : ''}" style="width: ${value}%"></div>
+                    </div>
+                    <div class="card-effect">At 60%: ${opt.effect}</div>
+                    <button class="lock-btn ${diminishingClass}" data-action="${opt.key}" ${isThrottled || walletDepleted ? 'disabled' : ''}>
+                        ${isThrottled ? `COOLDOWN ${Math.ceil((throttle - Date.now())/1000)}s` : walletDepleted ? 'NO TOKENS' : 'LOCK TOKEN'}
+                    </button>
+                    ${hasConfidenceBonus ? `
+                        <div class="confidence-indicator active confidence-tooltip"
+                             data-tip="Consistency bonus: +${Math.round((confidenceWeight - 1) * 100)}% weight">
+                            ⬆ CONFIDENCE WEIGHT: ${confidenceWeight}×
+                        </div>
+                    ` : '<div class="confidence-indicator"></div>'}
+                    ${diminishing > 0 ? `<div class="momentum-indicator">-${diminishing}% effectiveness</div>` : ''}
+                    <div class="echo-band ${opt.class}" data-stance="${opt.key}"></div>
+                    <div class="mirror-indicator" id="mirror-${opt.key}">
+                        ⟳ INFLUENCER ECHO ACTIVE
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            document.querySelectorAll('.lock-btn').forEach(btn => {
+                btn.addEventListener('click', handleLockToken);
+            });
+        }
+
+        function applyTokenCommit(type, district) {
+            if (TOKEN_WALLET[type] <= 0) return;
+
+            TOKEN_WALLET[type]--;
+            renderWallet();
+
+            USER_STATE.recordCommit(type);
+
+            const influencerEntry = Object.entries(CITY_STATE.influencerMomentum).find(
+                ([_, inf]) => inf.stance === type && inf.active
+            );
+            const momentumBoost = influencerEntry
+                ? getEffectiveMultiplier(influencerEntry[0])
+                : 1;
+
+            if (!CITY_STATE.diminishingReturns[district]) {
+                CITY_STATE.diminishingReturns[district] = {};
+            }
+            const currentDiminishing = CITY_STATE.diminishingReturns[district][type] || 0;
+
+            let boost = (15 * momentumBoost) - currentDiminishing;
+            if (boost < 0) boost = 0;
+            if (boost > 15) boost = 15;
+
+            CITY_STATE.districts[district][type] = Math.min(
+                100,
+                CITY_STATE.districts[district][type] + boost
+            );
+            CITY_STATE.diminishingReturns[district][type] = currentDiminishing + 20;
+            CITY_STATE.lockThrottle[type] = Date.now() + 30000;
+
+            addCommitTrailEntry(
+                `${CURRENT_USER ? CURRENT_USER.displayName : 'You'} locked ${type.toUpperCase()} Token in ${district}`
+            );
+            triggerEchoBand(type);
+            triggerRipple(type);
+            calculateGlobal();
+            checkGateStatus();
+        }
+
+        function handleLockToken(e) {
+            const action = e.target.dataset.action;
+            applyTokenCommit(action, CITY_STATE.currentDistrict);
+            renderCards();
+        }
+
+        function addCommitTrailEntry(text) {
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+            CITY_STATE.commitTrail.unshift({ time: timestamp, text: text });
+            if (CITY_STATE.commitTrail.length > 10) CITY_STATE.commitTrail.pop();
+            renderCommitTrail();
+        }
+
+        function renderCommitTrail() {
+            const container = document.getElementById('commit-trail-content');
+            if (!container) return;
+            
+            if (CITY_STATE.commitTrail.length === 0) {
+                container.innerHTML = '<div class="commit-entry">Waiting for commitments...</div>';
+                return;
+            }
+            
+            container.innerHTML = CITY_STATE.commitTrail.map(entry => 
+                `<div class="commit-entry">[${entry.time}] ${entry.text}</div>`
+            ).join('');
+        }
+
+        function checkGateStatus() {
+            const global = CITY_STATE.global;
+            const wasActive = CITY_STATE.gateActive;
+            const isActive = global.calm >= 60 || global.verify >= 60 || global.aid >= 60;
+
+            if (isActive && !wasActive) {
+                CITY_STATE.gateActive = true;
+                CITY_STATE.protocolStartTime = Date.now();
+                document.getElementById('protocol-status')?.classList.add('active');
+            }
+
+            document.querySelectorAll('.consensus-card').forEach(card => {
+                const pct = parseInt(card.querySelector('.card-percentage')?.textContent || '0');
+                if (pct >= 60) {
+                    card.classList.add('active-protocol');
+                }
+            });
+        }
+
+        function updateProtocolTimer() {
+            if (!CITY_STATE.gateActive || !CITY_STATE.protocolStartTime) return;
+
+            const elapsed = Date.now() - CITY_STATE.protocolStartTime;
+            const hours = Math.floor(elapsed / 3600000);
+            const minutes = Math.floor((elapsed % 3600000) / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+
+            const timer = document.getElementById('protocol-timer');
+            if (timer) {
+                timer.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        function renderInfluencers() {
+            const container = document.getElementById('influencers');
+            if (!container) return;
+
+            const influencers = [
+                { name: 'Vex_Neon',   stance: 'calm',   quote: 'Stay sharp. Stay calm.' },
+                { name: 'Truth_Leak', stance: 'verify', quote: 'Trust nothing. Verify everything.' },
+                { name: 'Zero_Day',   stance: 'aid',    quote: 'Hands on deck. Everyone counts.' }
+            ];
+
+            container.innerHTML = influencers.map(inf => `
+                <div class="influencer">
+                    ${getSidebarAvatar(inf.name, inf.stance, inf.name.charAt(0))}
+                    <div class="influencer-info">
+                        <div class="influencer-name">${inf.name}</div>
+                        <div class="influencer-stance">→ ${inf.stance.toUpperCase()}</div>
+                        <div class="influencer-quote">"${inf.quote}"</div>
+                    </div>
+                </div>
+            `).join('');
+
+            const tooltipDiv = document.createElement('div');
+            tooltipDiv.className = 'tooltip';
+            tooltipDiv.setAttribute('data-tip', 'Influencers catalyze momentum but cannot command outcomes');
+            tooltipDiv.style.cssText = 'font-size: 0.65rem; color: var(--text-dim); margin-top: 10px; text-align: center;';
+            tooltipDiv.textContent = 'ℹ Catalyst Cap Tooltip';
+            container.appendChild(tooltipDiv);
+        }
+
+        function renderInfluencerGrid() {
+            const container = document.getElementById('influencer-grid');
+            if (!container) return;
+
+            const influencers = [
+                { name: 'Vex_Neon',   stance: 'calm',   quote: 'Stay sharp. Stay calm.',             bio: 'Street sage of the docks' },
+                { name: 'Truth_Leak', stance: 'verify', quote: 'Trust nothing. Verify everything.', bio: 'Information broker' },
+                { name: 'Zero_Day',   stance: 'aid',    quote: 'Hands on deck. Everyone counts.',   bio: 'Emergency response coord' }
+            ];
+
+            container.innerHTML = influencers.map(inf => {
+                const momentum       = CITY_STATE.influencerMomentum[inf.name]?.momentum  || 0;
+                const isActive       = CITY_STATE.influencerMomentum[inf.name]?.active    || false;
+                const integrity      = CITY_STATE.influencerMomentum[inf.name]?.integrity ?? 100;
+                const isLowIntegrity = integrity < 50;
+
+                return `
+                    <div class="influencer-card ${isLowIntegrity ? 'low-integrity' : ''}">
+                        ${getInfluencerAvatar(inf.name, inf.name.charAt(0))}
+                        <div class="name">${inf.name}</div>
+                        <div class="bio">${inf.bio}</div>
+                        <div class="stance">→ ${inf.stance.toUpperCase()}</div>
+                        <div class="momentum-meter">
+                            <div class="momentum-fill" style="width: ${momentum}%"></div>
+                        </div>
+                        <div class="momentum-label">MOMENTUM: ${momentum}% / 15% CAP</div>
+                        <div class="integrity-meter">
+                            <div class="integrity-fill ${isLowIntegrity ? 'warning' : ''}" style="width: ${integrity}%"></div>
+                        </div>
+                        <div class="integrity-label">INTEGRITY: ${integrity}% ${isLowIntegrity ? '(Reduced influence)' : ''}</div>
+                        <button class="stake-btn"
+                                onclick="stakeInfluencer('${inf.name}','${inf.stance}')"
+                                ${isActive ? 'disabled' : ''}>
+                            ${isActive ? 'STAKED' : 'STAKE'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function stakeInfluencer(name, stance) {
+            const inf = CITY_STATE.influencerMomentum[name];
+            if (inf && !inf.active) {
+                inf.active = true;
+                inf.momentum = Math.min(100, inf.momentum + 15);
+                
+                const card = document.querySelector(`#influencer-grid .influencer-card:nth-child(${Object.keys(CITY_STATE.influencerMomentum).indexOf(name) + 1})`);
+                if (card) {
+                    const ripple = document.createElement('div');
+                    ripple.className = 'ripple-effect';
+                    card.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                }
+
+                addCommitTrailEntry(`Influencer ${name} staked ${stance.toUpperCase()}`);
+                renderInfluencerGrid();
+            }
+        }
+
+        function triggerRipple(stance) {
+            const cards = document.querySelectorAll('.influencer-card');
+            cards.forEach(card => {
+                if (card.querySelector('.stance')?.textContent.includes(stance.toUpperCase())) {
+                    const ripple = document.createElement('div');
+                    ripple.className = 'ripple-effect';
+                    card.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                }
+            });
+        }
+
+        function renderDistrictGrid() {
+            const container = document.getElementById('district-grid');
+            if (!container) return;
+
+            const districts = Object.keys(CITY_STATE.districts);
+            
+            container.innerHTML = districts.map(name => {
+                const values = CITY_STATE.districts[name];
+                const mood = values.calm > 50 ? 'Crowds are calm.' : values.calm > 35 ? 'Crowds are tense.' : 'Crowds are agitated.';
+                const urgent = values.calm >= 55 ? 'Nearing Calm threshold' : null;
+
+                const cls = name === 'Old Dock' ? 'old-dock' : 'midtown';
+                
+                return `
+                    <div class="district-card ${cls}" onclick="setDistrictFromGrid('${name}')">
+                        <h3>${name.toUpperCase()}</h3>
+                        <div class="district-mood">"${mood}"</div>
+                        <div class="district-bars">
+                            <div class="district-bar">
+                                <span class="district-bar-label">CALM</span>
+                                <div class="district-bar-track"><div class="district-bar-fill calm" style="width: ${values.calm}%"></div></div>
+                                <span class="district-bar-value" style="color: var(--neon-blue)">${values.calm}%</span>
+                            </div>
+                            <div class="district-bar">
+                                <span class="district-bar-label">VERIFY</span>
+                                <div class="district-bar-track"><div class="district-bar-fill verify" style="width: ${values.verify}%"></div></div>
+                                <span class="district-bar-value" style="color: var(--neon-green)">${values.verify}%</span>
+                            </div>
+                            <div class="district-bar">
+                                <span class="district-bar-label">AID</span>
+                                <div class="district-bar-track"><div class="district-bar-fill aid" style="width: ${values.aid}%"></div></div>
+                                <span class="district-bar-value" style="color: var(--neon-purple)">${values.aid}%</span>
+                            </div>
+                        </div>
+                        <div class="mini-feed">
+                            ${urgent ? `<div class="mini-feed-item urgent">⚠ ${urgent} (${values.calm}%)</div>` : ''}
+                            <div class="mini-feed-item">Global: ${CITY_STATE.global.calm}%</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setDistrictFromGrid(name) {
+            CITY_STATE.currentDistrict = name;
+            location.hash = 'board';
+            
+            document.querySelectorAll('.district-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.district === name);
+            });
+            
+            renderAll();
+        }
+
+        function renderHeatMeters() {
+            const district = CITY_STATE.currentDistrict;
+            const calm = CITY_STATE.districts[district].calm;
+            const rawPanic = Math.max(0, Math.min(100, 100 - calm));
+            const rawRumor = Math.max(0, Math.min(100,
+                Math.round((100 - calm) / 2 + (Math.random() - 0.5) * 10)
+            ));
+
+            HEAT_STATE.addReading('panic', rawPanic);
+            HEAT_STATE.addReading('rumor', rawRumor);
+
+            const panic      = HEAT_STATE.smoothed.panic;
+            const rumor      = HEAT_STATE.smoothed.rumor;
+            const panicTrend = HEAT_STATE.getTrend('panic');
+            const rumorTrend = HEAT_STATE.getTrend('rumor');
+
+            const updateMeter = (fillId, valueId, trendId, meterId, projId, val, trend, type) => {
+                const fill    = document.getElementById(fillId);
+                const valueEl = document.getElementById(valueId);
+                const trendEl = document.getElementById(trendId);
+                const meter   = document.getElementById(meterId);
+                const proj    = document.getElementById(projId);
+
+                if (!fill) return;
+
+                const clamped = Math.max(0, Math.min(100, val));
+                fill.style.height = `${clamped}%`;
+
+                fill.classList.remove('zone-stable', 'zone-elevated', 'zone-critical');
+                if      (clamped < 30) fill.classList.add('zone-stable');
+                else if (clamped < 60) fill.classList.add('zone-elevated');
+                else                   fill.classList.add('zone-critical');
+
+                if (valueEl) {
+                    valueEl.textContent = `${clamped}%`;
+                    valueEl.classList.toggle('critical', clamped >= 60);
+                }
+
+                if (trendEl) {
+                    const arrows = { rising: '▲', falling: '▼', stable: '⏸' };
+                    trendEl.textContent = arrows[trend];
+                    trendEl.className   = `heat-trend ${trend}`;
+                }
+
+                if (meter) meter.classList.toggle('critical', clamped >= 60);
+
+                if (proj) {
+                    const delta = type === 'panic'
+                        ? (CITY_STATE.districts[district].calm   - 50)
+                        : (CITY_STATE.districts[district].verify - 50);
+                    proj.classList.remove('rising', 'falling');
+                    if (clamped >= 30) {
+                        if (delta < -5) {
+                            proj.classList.add('rising');
+                            proj.style.bottom = `${Math.min(95, clamped + 10)}%`;
+                        } else if (delta > 5) {
+                            proj.classList.add('falling');
+                            proj.style.bottom = `${Math.max(5, clamped - 10)}%`;
+                        }
+                    }
+                }
+            };
+
+            updateMeter('panic-fill','panic-value','panic-trend','panic-meter','panic-projection', panic, panicTrend, 'panic');
+            updateMeter('rumor-fill','rumor-value','rumor-trend','rumor-meter','rumor-projection', rumor, rumorTrend, 'rumor');
+        }
+
+        function renderGlobal() {
+            calculateGlobal();
+            const el = document.getElementById('global-average');
+            if (el) el.textContent = `${CITY_STATE.global.calm}%`;
+        }
+
+        function renderWallet() {
+            document.getElementById('wallet-calm').textContent = TOKEN_WALLET.calm;
+            document.getElementById('wallet-verify').textContent = TOKEN_WALLET.verify;
+            document.getElementById('wallet-aid').textContent = TOKEN_WALLET.aid;
+
+            document.querySelectorAll('.wallet-item').forEach(item => {
+                const type = item.classList.contains('calm') ? 'calm' : item.classList.contains('verify') ? 'verify' : 'aid';
+                item.classList.toggle('token-depleted', TOKEN_WALLET[type] <= 0);
+            });
+        }
+
+        function socialEntropy() {
+            Object.keys(CITY_STATE.districts).forEach(district => {
+                Object.keys(CITY_STATE.districts[district]).forEach(key => {
+                    const current = CITY_STATE.districts[district][key];
+                    const jitter = (Math.random() - 0.5) * 0.3;
+                    let newVal = current + jitter;
+                    newVal = Math.max(0, Math.min(100, newVal));
+                    CITY_STATE.districts[district][key] = Math.round(newVal * 100) / 100;
+                });
+            });
+
+            calculateGlobal();
+            
+            const cardPcts = document.querySelectorAll('.card-percentage');
+            const districtData = CITY_STATE.districts[CITY_STATE.currentDistrict];
+            
+            if (cardPcts.length > 0) {
+                cardPcts[0].textContent = `${Math.round(districtData.calm)}%`;
+                cardPcts[1].textContent = `${Math.round(districtData.verify)}%`;
+                cardPcts[2].textContent = `${Math.round(districtData.aid)}%`;
+            }
+
+            const bars = document.querySelectorAll('.bar-fill');
+            if (bars.length > 0) {
+                bars[0].style.width = `${districtData.calm}%`;
+                bars[1].style.width = `${districtData.verify}%`;
+                bars[2].style.width = `${districtData.aid}%`;
+            }
+
+            const globalEl = document.getElementById('global-average');
+            if (globalEl) globalEl.textContent = `${CITY_STATE.global.calm}%`;
+
+            renderHeatMeters();
+            checkGateStatus();
+            updateProtocolTimer();
+            updateThrottleButtons();
+
+            if (document.getElementById('district-grid')) renderDistrictGrid();
+        }
+
+        function updateThrottleButtons() {
+            Object.keys(CITY_STATE.lockThrottle).forEach(key => {
+                const throttle = CITY_STATE.lockThrottle[key];
+                const btn = document.querySelector(`[data-action="${key}"]`);
+                if (btn) {
+                    if (throttle && Date.now() < throttle) {
+                        btn.disabled = true;
+                        btn.textContent = `COOLDOWN ${Math.ceil((throttle - Date.now())/1000)}s`;
+                    } else if (TOKEN_WALLET[key] <= 0) {
+                        btn.disabled = true;
+                        btn.textContent = 'NO TOKENS';
+                    } else {
+                        btn.disabled = false;
+                        btn.textContent = 'LOCK TOKEN';
+                    }
+                }
+            });
+        }
+
+        // Commit page handlers
+        document.getElementById('commit-district-options')?.addEventListener('click', (e) => {
+            const opt = e.target.closest('.step-option');
+            if (!opt) return;
+            
+            document.querySelectorAll('#commit-district-options .step-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            COMMIT_STATE.district = opt.dataset.district;
+            updateCommitPreview();
+        });
+
+        document.getElementById('commit-token-options')?.addEventListener('click', (e) => {
+            const opt = e.target.closest('.step-option');
+            if (!opt) return;
+            
+            document.querySelectorAll('#commit-token-options .step-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            COMMIT_STATE.token = opt.dataset.token;
+            updateCommitPreview();
+        });
+
+        function updateCommitPreview() {
+            const effects = {
+                calm: 'safe routes will unlock city-wide',
+                verify: 'panic behavior will be reduced',
+                aid: 'emergency response will surge'
+            };
+            
+            const text = `You are publicly committing to <strong>${COMMIT_STATE.token.toUpperCase()}</strong> mode in <strong>${COMMIT_STATE.district.toUpperCase()}</strong>.<br><br>If consensus reaches 60%, ${effects[COMMIT_STATE.token]}.`;
+            
+            const previewText = document.getElementById('commit-preview-text');
+            if (previewText) previewText.innerHTML = text;
+
+            const btn = document.getElementById('commit-confirm-btn');
+            if (btn) btn.disabled = TOKEN_WALLET[COMMIT_STATE.token] <= 0;
+        }
+
+        function executeCommit() {
+            applyTokenCommit(COMMIT_STATE.token, COMMIT_STATE.district);
+            updateCommitPreview();
+            location.hash = 'board';
+        }
+
+        document.querySelectorAll('.district-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.district-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                CITY_STATE.currentDistrict = e.target.dataset.district;
+                
+                if (!CITY_STATE.baseValues[CITY_STATE.currentDistrict]) {
+                    CITY_STATE.baseValues[CITY_STATE.currentDistrict] = { ...CITY_STATE.districts[CITY_STATE.currentDistrict] };
+                }
+                
+                renderAll();
+            });
+        });
+
+        function renderAll() {
+            renderCards();
+            renderInfluencers();
+            renderHeatMeters();
+            renderGlobal();
+            renderWallet();
+            renderCommitTrail();
+            updatePipelineNotice();
+        }
+
+        window.getConsensifyState = function() {
+            return JSON.parse(JSON.stringify({ CITY_STATE, TOKEN_WALLET }));
+        };
+
+        window.Consensify = {
+            CITY_STATE,
+            TOKEN_WALLET,
+            getState: () => ({ CITY_STATE, TOKEN_WALLET })
+        };
+
+        // NEW LOGIC FOR VERIFIED TRUTH PIPELINE
+        let PUB_SELECTED_URGENCY = 'routine';
+        let PUB_SELECTED_THRESHOLD = 60;
+
+        // ── URGENCY SELECTOR ──
+        document.getElementById('urgency-selector')
+          ?.addEventListener('click', (e) => {
+            const opt = e.target.closest('.urgency-option');
+            if (!opt) return;
+            document.querySelectorAll('.urgency-option')
+              .forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            PUB_SELECTED_URGENCY = opt.dataset.urgency;
+          });
+
+        document.getElementById('pub-threshold')
+          ?.addEventListener('input', (e) => {
+            PUB_SELECTED_THRESHOLD = parseInt(e.target.value);
+            document.getElementById('pub-threshold-display')
+              .textContent = PUB_SELECTED_THRESHOLD + '%';
+          });
+
+        // ── PUBLISH REPORT ──
+        function publishReport() {
+          const title = document.getElementById('pub-title').value.trim();
+          const body = document.getElementById('pub-body').value.trim();
+          const errEl = document.getElementById('publish-error');
+
+          if (!title) {
+            errEl.textContent = 'REPORT TITLE REQUIRED';
+            errEl.style.display = 'block';
+            return;
+          }
+          if (!body || body.length < 20) {
+            errEl.textContent = 'REPORT BODY TOO SHORT — MINIMUM 20 CHARACTERS';
+            errEl.style.display = 'block';
+            return;
+          }
+          if (!CURRENT_USER || CURRENT_USER.role !== 'authority') {
+            errEl.textContent = 'AUTHORITY CREDENTIALS REQUIRED';
+            errEl.style.display = 'block';
+            return;
+          }
+
+          errEl.style.display = 'none';
+
+          const report = {
+            id: 'r_' + Date.now(),
+            title,
+            body,
+            urgency: PUB_SELECTED_URGENCY,
+            publishedAt: Date.now(),
+            publishedBy: CURRENT_USER.displayName,
+            stage: 'pending',
+            validations: [],
+            validatorThreshold: PUB_SELECTED_THRESHOLD,
+            deliberationThread: [],
+            challengeCount: 0,
+            acceptTokens: 0,
+            disputeTokens: 0,
+            acceptThreshold: 60,
+            publicOpenedAt: null,
+            canonicalAt: null,
+            returnedAt: null,
+            returnReason: null,
+            userVotes: {}
+          };
+
+          REPORT_STORE.push(report);
+
+          // Clear form
+          document.getElementById('pub-title').value = '';
+          document.getElementById('pub-body').value = '';
+          PUB_SELECTED_URGENCY = 'routine';
+          PUB_SELECTED_THRESHOLD = 60;
+          document.getElementById('pub-threshold').value = 60;
+          document.getElementById('pub-threshold-display').textContent = '60%';
+          document.querySelectorAll('.urgency-option').forEach((o, i) => {
+            o.classList.toggle('selected', i === 0);
+          });
+
+          const btn = document.getElementById('publish-report-btn');
+          btn.textContent = 'REPORT SUBMITTED';
+          btn.style.background = 'var(--neon-green, #05ffa1)';
+          setTimeout(() => {
+            btn.textContent = 'SUBMIT TO VALIDATION COUNCIL';
+            btn.style.background = 'var(--neon-red)';
+          }, 2000);
+
+          // Show pipeline notice on board
+          updatePipelineNotice();
+          renderReportsPage();
+        }
+
+        document.getElementById('publish-report-btn')
+          ?.addEventListener('click', publishReport);
+
+        // ── VALIDATOR ACTION ──
+        function validatorAction(reportId, action, challengeNote = '') {
+          if (!CURRENT_USER) return;
+          if (!isEligibleValidator(CURRENT_USER.username)) return;
+
+          const report = REPORT_STORE.find(r => r.id === reportId);
+          if (!report) return;
+          if (report.stage !== 'pending' && report.stage !== 'deliberation') return;
+
+          // Check if already responded
+          const existing = report.validations
+            .find(v => v.username === CURRENT_USER.username);
+          if (existing) return;
+
+          report.validations.push({
+            username: CURRENT_USER.username,
+            displayName: CURRENT_USER.displayName,
+            score: CURRENT_USER.respectScore,
+            action,
+            note: challengeNote,
+            timestamp: Date.now()
+          });
+
+          if (action === 'challenge') {
+            report.challengeCount++;
+            report.stage = 'deliberation';
+            if (challengeNote) {
+              report.deliberationThread.push({
+                from: CURRENT_USER.username,
+                displayName: CURRENT_USER.displayName,
+                role: 'influencer',
+                text: challengeNote,
+                timestamp: Date.now()
+              });
+            }
+          }
+
+          // Check if threshold met to advance to public
+          checkValidationThreshold(report);
+          renderReportsPage();
+        }
+
+        // ── CHECK VALIDATION THRESHOLD ──
+        function checkValidationThreshold(report) {
+          const progress = getValidatorProgress(report);
+          if (progress >= report.validatorThreshold) {
+            report.stage = 'public';
+            report.publicOpenedAt = Date.now();
+            updatePipelineNotice();
+          }
+        }
+
+        // ── AUTHORITY REPLY TO CHALLENGE ──
+        function authorityReply(reportId, replyText) {
+          if (!CURRENT_USER || CURRENT_USER.role !== 'authority') return;
+          if (!replyText.trim()) return;
+
+          const report = REPORT_STORE.find(r => r.id === reportId);
+          if (!report || report.stage !== 'deliberation') return;
+
+          report.deliberationThread.push({
+            from: CURRENT_USER.username,
+            displayName: CURRENT_USER.displayName,
+            role: 'authority',
+            text: replyText.trim(),
+            timestamp: Date.now()
+          });
+
+          renderReportsPage();
+        }
+
+        // ── PUBLIC VOTE ──
+        function publicVote(reportId, action) {
+          if (!CURRENT_USER) return;
+          if (CURRENT_USER.role === 'authority') return;
+
+          const report = REPORT_STORE.find(r => r.id === reportId);
+          if (!report || report.stage !== 'public') return;
+
+          // One vote per user per report
+          if (report.userVotes[CURRENT_USER.username]) return;
+          report.userVotes[CURRENT_USER.username] = action;
+
+          if (action === 'accept') {
+            report.acceptTokens++;
+          } else {
+            report.disputeTokens++;
+          }
+
+          // Check resolution
+          const total = report.acceptTokens + report.disputeTokens;
+          if (total >= 3) {
+            const acceptPct = (report.acceptTokens / total) * 100;
+            const disputePct = (report.disputeTokens / total) * 100;
+
+            if (acceptPct >= report.acceptThreshold) {
+              makeCanonical(report);
+            } else if (disputePct > (100 - report.acceptThreshold)) {
+              returnReport(report, 'Community requested further evidence');
+            }
+          }
+
+          renderReportsPage();
+        }
+
+        // ── MAKE CANONICAL ──
+        function makeCanonical(report) {
+          report.stage = 'canonical';
+          report.canonicalAt = Date.now();
+
+          // Update validator reputations
+          report.validations.forEach(v => {
+            const user = USER_STORE[v.username];
+            if (!user || !user.validatorReputation) return;
+            user.validatorReputation.totalValidated++;
+            if (v.action === 'validate') {
+              user.validatorReputation.provenAccurate++;
+            }
+            const rep = user.validatorReputation;
+            rep.accuracyRate = rep.totalValidated > 0
+              ? Math.round((rep.provenAccurate / rep.totalValidated) * 100 * 10) / 10
+              : 100;
+          });
+
+          updatePipelineNotice();
+          updateVizCounts();
+        }
+
+        // ── RETURN REPORT ──
+        function returnReport(report, reason) {
+          report.stage = 'returned';
+          report.returnedAt = Date.now();
+          report.returnReason = reason;
+
+          // Penalize validators who validated a returned report
+          report.validations
+            .filter(v => v.action === 'validate')
+            .forEach(v => {
+              const user = USER_STORE[v.username];
+              if (!user || !user.validatorReputation) return;
+              user.validatorReputation.totalValidated++;
+              user.validatorReputation.laterDisputed++;
+              const rep = user.validatorReputation;
+              rep.accuracyRate = rep.totalValidated > 0
+                ? Math.round((rep.provenAccurate / rep.totalValidated) * 100 * 10) / 10
+                : 100;
+            });
+        }
+
+        // ── PIPELINE BOARD NOTICE ──
+        function updatePipelineNotice() {
+          const notice = document.getElementById('pipeline-board-notice');
+          if (!notice) return;
+
+          const pendingCount = REPORT_STORE
+            .filter(r => r.stage === 'pending' || r.stage === 'deliberation').length;
+          const publicCount = REPORT_STORE
+            .filter(r => r.stage === 'public').length;
+
+          if (pendingCount > 0 || publicCount > 0) {
+            notice.classList.add('visible');
+            let msg = '';
+            if (pendingCount > 0)
+              msg += `${pendingCount} REPORT${pendingCount > 1 ? 'S' : ''} IN VALIDATION COUNCIL`;
+            if (publicCount > 0) {
+              if (msg) msg += ' • ';
+              msg += `${publicCount} REPORT${publicCount > 1 ? 'S' : ''} AWAITING PUBLIC VOTE`;
+            }
+            notice.querySelector('.notice-text').textContent = msg;
+          } else {
+            notice.classList.remove('visible');
+          }
+        }
+
+        // ── UPDATE VIZ COUNTS ──
+        function updateVizCounts() {
+          const eligibleEl = document.getElementById('viz-eligible-count');
+          const canonicalEl = document.getElementById('viz-canonical-count');
+          if (eligibleEl) {
+            const n = getEligibleValidators().length;
+            eligibleEl.textContent = `${n} ELIGIBLE`;
+          }
+          if (canonicalEl) {
+            const n = REPORT_STORE.filter(r => r.stage === 'canonical').length;
+            canonicalEl.textContent = `${n} CONFIRMED`;
+          }
+        }
+
+        // ── MAIN RENDER FUNCTION FOR REPORTS PAGE ──
+        function renderReportsPage() {
+          if (!document.getElementById('page-reports')) return;
+
+          updateVizCounts();
+
+          const pending = REPORT_STORE
+            .filter(r => r.stage === 'pending' || r.stage === 'deliberation');
+          const publicGates = REPORT_STORE.filter(r => r.stage === 'public');
+          const canonical = REPORT_STORE.filter(r => r.stage === 'canonical');
+
+          // Show/hide authority publish panel
+          const pubPanel = document.getElementById('authority-publish-panel');
+          if (pubPanel) {
+            pubPanel.style.display =
+              CURRENT_USER?.role === 'authority' ? 'block' : 'none';
+          }
+
+          // Pending list
+          renderPendingList(pending);
+
+          // Public gates list
+          renderPublicList(publicGates);
+
+          // Canonical list
+          renderCanonicalList(canonical);
+
+          updatePipelineNotice();
+        }
+
+        // ── RENDER PENDING / DELIBERATION REPORTS ──
+        function renderPendingList(reports) {
+          const list = document.getElementById('pending-reports-list');
+          const empty = document.getElementById('pending-empty');
+          if (!list) return;
+
+          list.innerHTML = '';
+          empty.style.display = reports.length === 0 ? 'block' : 'none';
+
+          reports.forEach(report => {
+            const progress = getValidatorProgress(report);
+            const userValidation = CURRENT_USER
+              ? report.validations.find(v => v.username === CURRENT_USER.username)
+              : null;
+            const canValidate = CURRENT_USER
+              && isEligibleValidator(CURRENT_USER.username)
+              && !userValidation;
+            const isAuthority = CURRENT_USER?.role === 'authority';
+
+            const card = document.createElement('div');
+            card.className = `report-card stage-${report.stage}`;
+
+            const timeAgo = formatTimeAgo(report.publishedAt);
+            const validatorChips = report.validations.map(v => `
+              <div class="validator-chip ${v.action}">
+                <div class="action-dot"></div>
+                <span class="v-name">${v.displayName}</span>
+                <span class="v-score">${v.score}pts</span>
+              </div>
+            `).join('');
+
+            const threadHTML = report.deliberationThread.length > 0 ? `
+              <div class="deliberation-thread">
+                <div class="thread-title">// DELIBERATION THREAD</div>
+                ${report.deliberationThread.map(entry => `
+                  <div class="thread-entry">
+                    <div class="thread-meta ${entry.role === 'authority'
+                      ? 'thread-from-authority' : 'thread-from-influencer'}">
+                      ${entry.displayName.toUpperCase()} •
+                      ${formatTimeAgo(entry.timestamp)}
+                    </div>
+                    <div style="color:var(--text-mid); word-break: break-word; overflow-wrap: break-word;">${entry.text}</div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : '';
+
+            const authorityReplyHTML = isAuthority
+              && report.stage === 'deliberation' ? `
+              <div class="authority-reply-area" id="reply-area-${report.id}">
+                <textarea class="challenge-textarea"
+                  id="reply-text-${report.id}"
+                  placeholder="Respond to the council's challenge..."></textarea>
+                <button class="challenge-submit-btn"
+                  onclick="submitAuthorityReply('${report.id}')">
+                  SUBMIT RESPONSE
+                </button>
+              </div>
+              <button class="report-action-btn challenge"
+                style="margin-top:10px;"
+                onclick="toggleReplyArea('${report.id}')">
+                RESPOND TO COUNCIL
+              </button>
+            ` : '';
+
+            const validatorActions = canValidate ? `
+              <div class="report-actions">
+                <button class="report-action-btn validate"
+                  onclick="validatorAction('${report.id}', 'validate')">
+                  VALIDATE
+                </button>
+                <button class="report-action-btn challenge"
+                  onclick="toggleChallengeArea('${report.id}')">
+                  CHALLENGE
+                </button>
+                <button class="report-action-btn abstain"
+                  onclick="validatorAction('${report.id}', 'abstain')">
+                  ABSTAIN
+                </button>
+              </div>
+              <div class="challenge-input-area" id="challenge-area-${report.id}">
+                <textarea class="challenge-textarea"
+                  id="challenge-text-${report.id}"
+                  placeholder="State your challenge clearly. This will be visible to the authority and all validators."></textarea>
+                <button class="challenge-submit-btn"
+                  onclick="submitChallenge('${report.id}')">
+                  SUBMIT CHALLENGE
+                </button>
+              </div>
+            ` : userValidation ? `
+              <div style="padding:10px;background:rgba(0,0,0,0.2);
+                border:1px solid var(--border-glow);margin-top:12px;
+                font-family:Orbitron;font-size:0.65rem;letter-spacing:1px;
+                color:var(--text-dim);">
+                YOUR RESPONSE: <span style="color:${
+                  userValidation.action === 'validate'
+                    ? 'var(--neon-green)'
+                    : userValidation.action === 'challenge'
+                    ? 'var(--neon-red)' : 'var(--text-dim)'
+                };">${userValidation.action.toUpperCase()}</span>
+              </div>
+            ` : '';
+
+            // Show validator rep if current user is eligible
+            const repHTML = CURRENT_USER
+              && isEligibleValidator(CURRENT_USER.username)
+              && canValidate ? (() => {
+                const rep = USER_STORE[CURRENT_USER.username].validatorReputation;
+                return rep ? `
+                  <div class="validator-rep-box">
+                    <div class="rep-stat">
+                      <div class="rep-stat-value">${rep.totalValidated}</div>
+                      <div class="rep-stat-label">VALIDATED</div>
+                    </div>
+                    <div class="rep-stat">
+                      <div class="rep-stat-value">${rep.provenAccurate}</div>
+                      <div class="rep-stat-label">ACCURATE</div>
+                    </div>
+                    <div class="rep-stat">
+                      <div class="rep-stat-value">${rep.accuracyRate}%</div>
+                      <div class="rep-stat-label">ACCURACY</div>
+                    </div>
+                  </div>
+                ` : '';
+              })() : '';
+
+            card.innerHTML = `
+              <div class="report-card-header">
+                <div class="report-title">${report.title}</div>
+                <span class="urgency-badge ${report.urgency}">
+                  ${report.urgency.toUpperCase()}
+                </span>
+              </div>
+              <div class="report-meta">
+                PUBLISHED BY ${report.publishedBy.toUpperCase()} • ${timeAgo}
+                • THRESHOLD: ${report.validatorThreshold}%
+              </div>
+              <div class="report-body">${report.body}</div>
+              <div class="validator-progress">
+                <div class="validator-progress-label">
+                  <span>VALIDATION COUNCIL PROGRESS</span>
+                  <span class="pct">${progress}% / ${report.validatorThreshold}%</span>
+                </div>
+                <div class="validator-progress-track">
+                  <div class="validator-threshold-line"
+                    style="left:${report.validatorThreshold}%"></div>
+                  <div class="validator-progress-fill"
+                    style="width:${Math.min(progress, 100)}%"></div>
+                </div>
+              </div>
+              ${report.validations.length > 0 ? `
+                <div class="validator-list">${validatorChips}</div>
+              ` : ''}
+              ${threadHTML}
+              ${repHTML}
+              ${validatorActions}
+              ${authorityReplyHTML}
+            `;
+
+            list.appendChild(card);
+          });
+        }
+
+        // ── RENDER PUBLIC GATES ──
+        function renderPublicList(reports) {
+          const list = document.getElementById('public-reports-list');
+          const empty = document.getElementById('public-empty');
+          if (!list) return;
+
+          list.innerHTML = '';
+          empty.style.display = reports.length === 0 ? 'block' : 'none';
+
+          reports.forEach(report => {
+            const total = report.acceptTokens + report.disputeTokens;
+            const acceptPct = total > 0
+              ? Math.round((report.acceptTokens / total) * 100) : 0;
+            const disputePct = total > 0
+              ? Math.round((report.disputeTokens / total) * 100) : 0;
+
+            const userVote = CURRENT_USER
+              ? report.userVotes[CURRENT_USER.username]
+              : null;
+            const canVote = CURRENT_USER
+              && CURRENT_USER.role !== 'authority'
+              && !userVote;
+
+            const validatorSummary = report.validations
+              .filter(v => v.action === 'validate')
+              .map(v => {
+                const rep = USER_STORE[v.username]?.validatorReputation;
+                const accuracy = rep ? `${rep.accuracyRate}% accurate` : '';
+                return `
+                  <div class="validator-chip validate">
+                    <div class="action-dot"></div>
+                    <span class="v-name">${v.displayName}</span>
+                    <span class="v-score">${accuracy}</span>
+                  </div>
+                `;
+              }).join('');
+
+            const challengeNotes = report.validations
+              .filter(v => v.action === 'challenge' && v.note)
+              .map(v => `
+                <div style="padding:8px 12px;border-left:2px solid var(--neon-red);
+                  margin-bottom:6px;font-size:0.75rem;color:var(--text-mid);
+                  word-break: break-word; overflow-wrap: break-word;">
+                  <span style="color:var(--neon-red);font-family:Orbitron;
+                    font-size:0.6rem;letter-spacing:1px;">
+                    CHALLENGE — ${v.displayName.toUpperCase()}:
+                  </span>
+                  <br>${v.note}
+                </div>
+              `).join('');
+
+            const card = document.createElement('div');
+            card.className = 'report-card stage-public';
+            card.innerHTML = `
+              <div class="report-card-header">
+                <div class="report-title">${report.title}</div>
+                <span class="urgency-badge ${report.urgency}">
+                  ${report.urgency.toUpperCase()}
+                </span>
+              </div>
+              <div class="report-meta">
+                PUBLISHED BY ${report.publishedBy.toUpperCase()} •
+                ${formatTimeAgo(report.publishedAt)} •
+                VALIDATED BY ${report.validations
+                  .filter(v => v.action === 'validate').length} COUNCIL MEMBERS
+              </div>
+              <div class="report-body">${report.body}</div>
+
+              ${report.validations.filter(v => v.action === 'validate').length > 0 ? `
+                <div style="margin-bottom:10px;">
+                  <div style="font-family:Orbitron;font-size:0.6rem;
+                    letter-spacing:2px;color:var(--text-dim);margin-bottom:8px;">
+                    VALIDATED BY
+                  </div>
+                  <div class="validator-list">${validatorSummary}</div>
+                </div>
+              ` : ''}
+
+              ${challengeNotes ? `
+                <div style="margin-bottom:12px;">
+                  <div style="font-family:Orbitron;font-size:0.6rem;
+                    letter-spacing:2px;color:var(--neon-red);margin-bottom:6px;">
+                    COUNCIL CHALLENGES (ON RECORD)
+                  </div>
+                  ${challengeNotes}
+                </div>
+              ` : ''}
+
+              <div class="public-vote-bars">
+                <div class="public-vote-row">
+                  <div class="public-vote-label accept">ACCEPT</div>
+                  <div class="public-vote-track">
+                    <div class="public-vote-fill accept"
+                      style="width:${acceptPct}%"></div>
+                  </div>
+                  <div class="public-vote-pct accept">${acceptPct}%</div>
+                </div>
+                <div class="public-vote-row">
+                  <div class="public-vote-label dispute">DISPUTE</div>
+                  <div class="public-vote-track">
+                    <div class="public-vote-fill dispute"
+                      style="width:${disputePct}%"></div>
+                  </div>
+                  <div class="public-vote-pct dispute">${disputePct}%</div>
+                </div>
+              </div>
+
+              <div style="font-size:0.65rem;color:var(--text-dim);
+                font-family:Orbitron;letter-spacing:1px;margin-bottom:12px;">
+                ${total} VOTE${total !== 1 ? 'S' : ''} CAST •
+                ${report.acceptThreshold}% ACCEPT THRESHOLD
+              </div>
+
+              ${canVote ? `
+                <div class="report-actions">
+                  <button class="report-action-btn accept"
+                    onclick="publicVote('${report.id}', 'accept')">
+                    ACCEPT AS CITY TRUTH
+                  </button>
+                  <button class="report-action-btn dispute"
+                    onclick="publicVote('${report.id}', 'dispute')">
+                    DISPUTE — REQUEST EVIDENCE
+                  </button>
+                </div>
+              ` : userVote ? `
+                <div style="padding:10px;background:rgba(0,0,0,0.2);
+                  border:1px solid var(--border-glow);
+                  font-family:Orbitron;font-size:0.65rem;letter-spacing:1px;
+                  color:var(--text-dim);">
+                  YOUR VOTE: <span style="color:${
+                    userVote === 'accept'
+                      ? 'var(--neon-blue)' : 'var(--neon-red)'
+                  };">${userVote.toUpperCase()}</span>
+                </div>
+              ` : `
+                <div style="padding:10px;font-family:Orbitron;
+                  font-size:0.65rem;color:var(--text-dim);letter-spacing:1px;">
+                  AUTHORITY ACCOUNTS CANNOT VOTE ON PUBLIC GATES
+                </div>
+              `}
+            `;
+            list.appendChild(card);
+          });
+        }
+
+        // ── RENDER CANONICAL LIST ──
+        function renderCanonicalList(reports) {
+          const list = document.getElementById('canonical-list');
+          const empty = document.getElementById('canonical-empty');
+          if (!list) return;
+
+          list.innerHTML = '';
+          empty.style.display = reports.length === 0 ? 'block' : 'none';
+
+          reports.slice().reverse().forEach(report => {
+            const total = report.acceptTokens + report.disputeTokens;
+            const acceptPct = total > 0
+              ? Math.round((report.acceptTokens / total) * 100) : 0;
+
+            const entry = document.createElement('div');
+            entry.className = 'canonical-entry';
+            entry.innerHTML = `
+              <div style="flex:1;">
+                <div class="canonical-title">${report.title}</div>
+                <div class="canonical-meta">
+                  PUBLISHED BY ${report.publishedBy.toUpperCase()} •
+                  ${formatTimeAgo(report.canonicalAt)} •
+                  VALIDATED BY ${report.validations
+                    .filter(v => v.action === 'validate').length} COUNCIL MEMBERS
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-mid);
+                  margin-top:8px;line-height:1.5;">
+                  ${report.body.length > 120
+                    ? report.body.substring(0, 120) + '...'
+                    : report.body}
+                </div>
+              </div>
+              <div style="text-align:center;flex-shrink:0;">
+                <div class="canonical-accept-pct">${acceptPct}%</div>
+                <div style="font-family:Orbitron;font-size:0.55rem;
+                  color:var(--text-dim);letter-spacing:1px;margin-top:3px;">
+                  ACCEPTED
+                </div>
+              </div>
+            `;
+            list.appendChild(entry);
+          });
+        }
+
+        // ── UI TOGGLE HELPERS ──
+        function toggleChallengeArea(reportId) {
+          const area = document.getElementById(`challenge-area-${reportId}`);
+          if (area) area.classList.toggle('visible');
+        }
+
+        function toggleReplyArea(reportId) {
+          const area = document.getElementById(`reply-area-${reportId}`);
+          if (area) area.classList.toggle('visible');
+        }
+
+        function submitChallenge(reportId) {
+          const text = document.getElementById(`challenge-text-${reportId}`)
+            ?.value.trim();
+          if (!text) return;
+          validatorAction(reportId, 'challenge', text);
+        }
+
+        function submitAuthorityReply(reportId) {
+          const text = document.getElementById(`reply-text-${reportId}`)
+            ?.value.trim();
+          if (!text) return;
+          authorityReply(reportId, text);
+          const area = document.getElementById(`reply-area-${reportId}`);
+          if (area) area.classList.remove('visible');
+          document.getElementById(`reply-text-${reportId}`).value = '';
+        }
+
+        // ── TIME FORMATTER ──
+        function formatTimeAgo(timestamp) {
+          const diff = Math.floor((Date.now() - timestamp) / 1000);
+          if (diff < 60) return `${diff}s ago`;
+          if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+          return `${Math.floor(diff / 3600)}h ago`;
+        }
+
+        // SEED ONE DEMO REPORT FOR THE JURY
+        REPORT_STORE.push({
+          id: 'r_demo_1',
+          title: 'Water Supply Status — Old Dock District',
+          body: 'Laboratory analysis confirms water supply in Old Dock is '
+            + 'uncontaminated. Rumours of poisoning are unverified. '
+            + 'City engineers conducted three independent tests at 06:00, '
+            + '09:00, and 12:00. All results within safe parameters. '
+            + 'Citizens are advised to continue normal usage.',
+          urgency: 'elevated',
+          publishedAt: Date.now() - 300000,
+          publishedBy: 'City Command',
+          stage: 'pending',
+          validations: [],
+          validatorThreshold: 60,
+          deliberationThread: [],
+          challengeCount: 0,
+          acceptTokens: 0,
+          disputeTokens: 0,
+          acceptThreshold: 60,
+          publicOpenedAt: null,
+          canonicalAt: null,
+          returnedAt: null,
+          returnReason: null,
+          userVotes: {}
+        });
+
+        // Initialize App
+        calculateGlobal();
+        
+        Object.keys(CITY_STATE.districts).forEach(d => {
+            CITY_STATE.baseValues[d] = { ...CITY_STATE.districts[d] };
+        });
+
+        renderRegistry();
+        route();
+        
+        if (CURRENT_USER) {
+            renderAll();
+            updateCommitPreview();
+        }
+
+        setInterval(socialEntropy, 1000);
+    </script>
+</body>
+</html>
